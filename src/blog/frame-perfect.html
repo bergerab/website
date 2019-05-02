@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Frame Perfect</title>
+    </head>
+    <body>
+        <canvas id="stage" width="300" height="300"></canvas>
+
+        <script>
+         const canvas = document.getElementById('stage'),
+               ctx = canvas.getContext('2d'),
+               width = canvas.width,
+               height = canvas.height;
+
+         let keyDown = false;
+         document.addEventListener('keydown', function (e) {
+             if (e.key === ' ') {
+                 keyDown = true;
+             }
+         });
+         document.addEventListener('keyup', function (e) {
+             if (e.key === ' ') {
+                 keyDown = false;
+             }
+         });
+
+         let t = new Date(),
+             keyDownTime = null,
+             failedCounter = 0,
+             successCounter = 0;
+
+         var jt = null,
+             lt = null;
+         
+         function loop() {
+             var now = new Date();
+             if (failedCounter > 0) {
+                 ctx.fillStyle = 'red';
+                 ctx.fillRect(0, 0, width, height);
+                 ctx.fillStyle = 'white';
+                 ctx.font = '40pt arial';
+                 ctx.fillText("Early", width/3, height/2);
+                 --failedCounter;
+             } else if (successCounter > 0) {
+                 ctx.fillStyle = 'green';
+                 ctx.fillRect(0, 0, width, height);
+                 ctx.fillStyle = 'white';
+                 ctx.font = '32pt arial';
+                 ctx.fillText("You got it!", width/5, height/2);
+                 --successCounter;
+             } else {
+                 ctx.fillStyle = 'blue';
+                 ctx.fillRect(0, 0, width, height);
+                 if (keyDown && !keyDownTime) {
+                     jt = new Date();
+                     keyDownTime = now;
+                     keyDown = false;
+                 }
+                 
+                 if (keyDownTime !== null && now - keyDownTime <= 448) {
+                     if (keyDown) {
+                         keyDownTime = null;
+                         failedCounter = 20;
+                     } else {
+                         ctx.fillStyle = 'yellow';
+
+                     }
+                     ctx.fillRect(0, 0, width, height);
+                 } else if (keyDownTime !== null) {
+                     if (keyDown) {
+                         successCounter = 20;
+                     }
+                     lt = new Date();
+                     console.log(lt - jt);
+                     keyDownTime = null;
+                 }
+             }
+             
+             keyDown = false;
+             requestAnimationFrame(loop);
+         }
+         requestAnimationFrame(loop);
+        </script>
+    </body>
+</html>
+

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Canvas</title>
+    </head>
+    <body>
+        <canvas id="stage" width="500" height="500"></canvas>
+
+        <script>
+         const canvas = document.getElementById('stage'),
+               ctx = canvas.getContext('2d');
+
+         function drawExamples(x=0, y=0) {
+             let maxTextWidth = 0;
+
+             function example(text, lineOffset=0) {
+                 const textWidth = ctx.measureText(text).width,
+                       textHeight = parseInt(ctx.font),
+                       textLeftPadding = textBottomPadding = 10,
+                       exampleLeftPadding = 20 + textLeftPadding,
+                       lineWidth = 100,
+                       lineHeight = 1;
+                 
+                 maxTextWidth = Math.max(maxTextWidth, textWidth);
+                 
+                 return function () {
+                     y += textHeight + textBottomPadding;                 
+                     ctx.fillText(text, textLeftPadding + (maxTextWidth - textWidth), y);
+                     ctx.fillRect(exampleLeftPadding + maxTextWidth, y - (textHeight/3) + lineOffset, lineWidth, lineHeight);
+                 }
+             }
+
+             [
+                 example('No offset:'),
+                 example('0.1 Offset:', 0.1),
+                 example('0.2 Offset:', 0.2),
+                 example('0.3 Offset:', 0.3),
+                 example('0.4 Offset:', 0.4),
+                 example('0.5 Offset:', 0.5),
+                 example('0.5 Offset:', 0.5),
+                 example('0.6 Offset:', 0.6),
+                 example('0.7 Offset:', 0.7),
+                 example('0.8 Offset:', 0.8),
+                 example('0.9 Offset:', 0.9),
+                 example('Integer Offset:', 1),                                                    
+                 
+             ].map(f => f());
+         }
+
+         ctx.font = '32px Arial';         
+         ctx.fillText('HTML Canvas Anti-Aliasing', 20, 30);
+         ctx.font = '24px Arial';                  
+         drawExamples(0, 40);
+        </script>
+    </body>
+</html>

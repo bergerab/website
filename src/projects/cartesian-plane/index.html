@@ -1,0 +1,259 @@
+<canvas id="coords" height="400" width="400"></canvas>
+<div>
+    <div id="equations">
+        <input id="add-equation" type="button" value="+">
+        <input type="button" value="Render">
+    </div>
+</div>
+<script>
+ const select = s => document.querySelector(s);
+ const selectAll = s => document.querySelectorAll(s);
+
+ let equationConfigs = [];
+ 
+ const renderButton = select('input[value=Render]')
+ renderButton.onclick = function () {
+     equationConfigs = [];
+     const equationConfigNodes = selectAll('.equation-config');
+     for (const node of equationConfigNodes) {
+         const equation = node.querySelector('input[name=equation]').value;
+         const color = node.querySelector('input[name=color]').value;
+         if (equation && color) {
+             equationConfigs.push({
+                 equation, 
+                 color, 
+             });
+         }
+     }
+
+     graph(ctx, {equationConfigs});
+ };
+ const addEquationButton = select('#add-equation');
+ const equations = select('#equations');
+ addEquationButton.onclick = function () {
+     const color = grabColor();
+     equations.insertAdjacentHTML('beforebegin',
+                                  `
+             <div class="equation-config">
+                 <div style="background-color:${color};width: 18px; height: 18px;display: inline-block;vertical-align: middle;border-width: 1px; border-style: solid; border-radius: 5px;"></div><input type="text" name="equation" value="">
+                 <input type="text" name="color" value="${color}" style="display: none;">
+                 <input type="button" name="close" value="-">
+             </div>
+                                  `);
+     for (const node of document.querySelectorAll('input[name=close]')) {
+         node.onclick = function() {
+             this.parentElement.remove();
+         };
+     }
+     for (const node of document.querySelectorAll('input[name=equation]')) {
+         node.onkeyup = function() {
+             renderButton.onclick();
+         };
+     }
+ };
+
+ const colorBag = [
+     'red',
+     'blue',
+     'green',
+     'darkorange',
+     'brown',
+     'magenta',
+ ];
+ function grabColor() {
+     const color = colorBag.shift();
+     colorBag.push(color);
+     return color;
+ }
+ 
+ const canvas= document.getElementById("coords");
+ const w = canvas.width,
+       h = canvas.height;
+ const ctx= canvas.getContext("2d");
+
+ // populate with default value
+ addEquationButton.onclick();
+ select('[name=equation]').value = 'y = 2*x + 1'
+ setTimeout(renderButton.onclick, 0);
+ 
+ var unit = 50;
+ document.onmousewheel = function (e) {
+     if (e.target === canvas) {
+         if (e.deltaY > 0) {
+             if (unit > 3) {
+                 unit = unit*0.95
+             }
+         } else if (e.deltaY < 0) {
+             if (unit < 300) {
+                 unit = unit*1.05
+             }
+         }
+         graph(ctx, {equationConfigs});
+
+     }
+ }
+
+ function split(n) {
+     function mantissa() {
+         const s = n.toString();
+         if (s.includes('.')) {
+             return parseFloat('.'+s.split('.')[1]);
+         }
+         return 0;
+     }
+     
+     return [Math.trunc(n), mantissa()]
+ }
+ 
+ graph(ctx);
+ function graph(ctx, config={}) {
+     
+     let showGrid = config.showGrid || true;
+     
+     let gridColor = config.gridColor || 'lightgray';
+     let axisColor = config.axisColor || 'black';
+
+     const stepSize = config.stepSize || unit < 10 ? unit/100 : ((w/unit)/w);
+     let equationConfigs = config.equationConfigs || [];
+
+     for (const ec of equationConfigs) {
+         let equation = ec.equation;
+         equation = equation.replace(' ', '').replace('\t', '').replace('\n', '').replace('\r', '').replace('cos', 'Math.cos').replace('sin', 'Math.sin').replace('tan', 'Math.tan');
+         if (equation.toString().startsWith('x=')) {
+             ec.dvar = 'x';
+         } else {
+             ec.dvar = 'y';
+         }
+         
+         try {
+             ec.f = eval('x => ' + equation.substring(2));
+         } catch {}
+     }
+     const origin = {
+         x: w/2,
+         y: h/2,
+     }
+     
+     const toCanvasPoint = p => {
+         return {
+             x: (p.x*unit)+origin.x,
+             y: (-p.y*unit)+origin.y, // negative is up for canvas
+         }
+     };
+
+     ctx.clearRect(0, 0, w, h);
+     if (showGrid) {
+         let resizedUnit = unit;
+         while (resizedUnit < 50) {
+             resizedUnit *= 2;
+         }
+         ctx.strokeStyle = gridColor;
+         resizedUnit = resizedUnit/5; // scale -- make lines closer
+         
+         const offsetY = resizedUnit * split(origin.y/resizedUnit)[1];
+         let countY = 0;
+         for (let i=offsetY; i<=w; i+=resizedUnit) {
+             ctx.beginPath();
+             ctx.moveTo(i, 0);
+             ctx.lineTo(i, h);
+             ctx.stroke();
+                     ++countY;
+         }
+         
+         const offsetX = resizedUnit * split(origin.x/resizedUnit)[1];
+         let countX = 0;
+         for (let i=offsetX; i<=h; i+=resizedUnit) {
+             ctx.beginPath();
+             ctx.moveTo(0, i);
+             ctx.lineTo(w, i);
+             ctx.stroke();
+                     ++countX;
+         }
+     }
+
+     ctx.strokeStyle = axisColor;
+     ctx.beginPath();
+     ctx.moveTo(origin.x, 0);
+     ctx.lineTo(origin.x, h);
+     ctx.stroke();
+
+     ctx.beginPath();
+     ctx.moveTo(0, origin.y);
+     ctx.lineTo(w, origin.y);
+     ctx.stroke();
+
+     var dvar;
+     for (const ec of equationConfigs) {
+         let points = [];
+         for (dvar=-(dvar === 'x' ? origin.x : origin.y) /unit; dvar<=((dvar === 'x' ? origin.y : origin.x)/unit); dvar+=stepSize) {
+             if (!ec.f) continue;
+             
+             if (ec.dvar === 'y') {
+                 var y = dvar;
+                 var x = ec.f(dvar);
+             } else {
+                 var y = ec.f(dvar)
+                 var x = dvar;
+             }
+
+             /*
+                if (Number.isNaN(y)) {
+                console.log(x, y);
+                }
+              */
+             
+             let {x:cx, y:cy} = toCanvasPoint({x, y});
+             if (cx > 0 && cy > 0 && cx < w && cy < h) {
+                 points.push({x:cx, y:cy});
+             } else {
+                 if (cx <= 0) {
+                     cx = -Infinity;
+                 } else if (cx >= w) {
+                     cx = Infinity;
+                 }
+
+                 if (cy <= 0) {
+                     cy = -Infinity;
+                 } else if (cy >= h) {
+                     cy = Infinity;
+                 }
+                 points.push({x:cx, y:cy, });                         
+             }
+         }
+
+         if (points.length < 1) {
+             continue;
+         }
+
+         ctx.strokeStyle = ec.color;
+         ctx.beginPath();
+
+         var inf = false;
+         for (const point of points) {
+             var {x, y} = point;
+             if (x === Infinity) {
+                 x = w-1;
+                 inf = true;
+             } else if (x === -Infinity) {
+                 x = 1;
+                 inf = true;
+             }
+
+             if (y === Infinity) {
+                 y = h-1;
+                 inf = true;
+             } else if (y === -Infinity) {
+                 y = 1;
+                 inf = true;
+             }
+             if (inf) {
+                 ctx.moveTo(x, y);
+                 inf = false;
+             } else {
+                 ctx.lineTo(x, y);
+             }
+         }
+         ctx.stroke();
+     }
+ }
+</script>
