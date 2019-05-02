@@ -68,4 +68,3 @@ you can also specify the interval that the scan is run with the `--interval` fla
 
 ## TODO
 - make some way of specifying title from child pages
-- when building a subdirectory only, we should copy over css and js files that are in templates too

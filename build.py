@@ -92,7 +92,8 @@ def build(src='./src', dist='./dist', build_dirs=None, with_deps=False):
 
                 for include in includes:
                     if include == '%%':
-                        template = re.sub('%%{' + CONTENTS_MAGIC_STRING + '}%%', contents, template)
+                        # re.sub turns \n into real newlines :(
+                        template = template.replace('%%{' + CONTENTS_MAGIC_STRING + '}%%', contents)
                     else:
                         distance = -1
                         cursor = filepath
@@ -107,7 +108,6 @@ def build(src='./src', dist='./dist', build_dirs=None, with_deps=False):
                 if '%%' not in includes:
                     template = '\n'.join([template, contents])
                     
-                template.replace('%%{' + CONTENTS_MAGIC_STRING + '}%%', contents.strip())
                 contents = template
                 
             

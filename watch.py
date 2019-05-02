@@ -93,8 +93,9 @@ def watch(src='./src', dist='./dist', dirs=None, interval=0.5, force_build=False
         for i in range(len(updates)):
             if updates[i].endswith(TEMPLATE_NAME):
                 updates[i] = os.path.dirname(updates[i])
-                
-        build_site(src=src, dist=dist, build_dirs=updates)
+
+        if updates:
+            build_site(src=src, dist=dist, build_dirs=updates)
         scheduler.enter(interval, 1, scan, (scheduler,))
         
     scheduler.enter(interval, 1, scan, (scheduler,))
