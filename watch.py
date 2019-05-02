@@ -26,12 +26,15 @@ def color_string(*msg, color=GREEN):
 # if a single template file changes
 # need to recompile entire folder
 
-def watch(src='./src', dist='./dist', dirs=[''], interval=0.5, force_build=False):
+def watch(src='./src', dist='./dist', dirs=None, interval=0.5, force_build=False):
     global build
     build = force_build
     
     src = os.path.realpath(src)
     dist = os.path.realpath(dist)
+
+    if not dirs:
+        dirs = [src]
     
     scheduler = sched.scheduler(time.time, time.sleep)
     def scan(scheduler):
@@ -90,7 +93,7 @@ def watch(src='./src', dist='./dist', dirs=[''], interval=0.5, force_build=False
         for i in range(len(updates)):
             if updates[i].endswith(TEMPLATE_NAME):
                 updates[i] = os.path.dirname(updates[i])
-        
+                
         build_site(src=src, dist=dist, build_dirs=updates)
         scheduler.enter(interval, 1, scan, (scheduler,))
         
@@ -99,7 +102,7 @@ def watch(src='./src', dist='./dist', dirs=[''], interval=0.5, force_build=False
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Watch the website files and compiles files that change')
-    parser.add_argument('dirs', type=str, help='Directories to watch', default=[''], nargs='*')
+    parser.add_argument('dirs', type=str, help='Directories to watch', default=None, nargs='*')
     parser.add_argument('--src', type=str, help='Root directory containing source files', default='./src')
     parser.add_argument('--dist', type=str, help='Directory to produce output', default='./dist')
     parser.add_argument('--interval', type=float, help='How frequently to scan (in seconds)', default=0.5)

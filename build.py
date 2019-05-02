@@ -8,9 +8,12 @@ from shutil import rmtree
 TEMPLATE_NAME = '.template.html'
 CONTENTS_MAGIC_STRING = '%%'
 
-def build(src='./src', dist='./dist', build_dirs=[''], with_deps=False):
+def build(src='./src', dist='./dist', build_dirs=None, with_deps=False):
     src = path.realpath(src)
     dist = path.realpath(dist)
+
+    if not build_dirs:
+        build_dirs = [src]
 
     # dir path to template contents
     templates_cache = {}
@@ -21,6 +24,8 @@ def build(src='./src', dist='./dist', build_dirs=[''], with_deps=False):
     
     filepaths = []
     for build_dir in build_dirs:
+        if not build_dir.startswith(src):
+            raise Exception('Invalid build directory "%s"' % build_dir)
         src_path = path.realpath(build_dir)
 
         # must have been deleted from src dir
@@ -42,7 +47,7 @@ def build(src='./src', dist='./dist', build_dirs=[''], with_deps=False):
 
             if not path.exists(output_dir):
                 makedirs(output_dir)
-            
+                
             filepaths += filter(lambda x: not path.isdir(x), glob(path.join(build_dir, '**', '*'), recursive=True))
 
     dirs = set(map(path.dirname, filepaths))
@@ -68,7 +73,7 @@ def build(src='./src', dist='./dist', build_dirs=[''], with_deps=False):
             for include in templates_cache[dir]['includes']:
                 if include != CONTENTS_MAGIC_STRING:
                     filepaths.append(path.join(dir, include))
-            
+                    
     # copy all files from src dir to dist dir
     # if html, append header and footer
     for filepath in filepaths:
@@ -115,7 +120,7 @@ def build(src='./src', dist='./dist', build_dirs=[''], with_deps=False):
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Build the website files')
-    parser.add_argument('paths', type=str, help='Paths to build', default=[''], nargs='*')
+    parser.add_argument('paths', type=str, help='Paths to build', default=None, nargs='*')
     parser.add_argument('--src', type=str, help='Root directory containing source files', default='./src')
     parser.add_argument('--dist', type=str, help='Directory to produce output', default='./dist')
     parser.add_argument('--with-deps', action='store_true', help='Moves all required files from templates to the output directory too')
