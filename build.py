@@ -77,8 +77,13 @@ def build(src='./src', dist='./dist', build_dirs=None, with_deps=False):
     # copy all files from src dir to dist dir
     # if html, append header and footer
     for filepath in filepaths:
-        contents = open(filepath).read()
+        output_filepath = filepath.replace(src, dist, 1)        
+        leaf_dir = output_filepath[:-len(path.basename(output_filepath))]
+        if not path.exists(leaf_dir):
+            makedirs(leaf_dir)
+
         if filepath.endswith('html'):
+            contents = open(filepath).read()
             dir = path.realpath(path.dirname(filepath))
             
             # make sure we are going from least length to greater
@@ -109,14 +114,14 @@ def build(src='./src', dist='./dist', build_dirs=None, with_deps=False):
                     template = '\n'.join([template, contents])
                     
                 contents = template
+                open(output_filepath, 'w').write(contents)
+        else:
+            contents = open(filepath, 'rb').read()
+            open(output_filepath, 'wb').write(contents)
                 
             
-        output_filepath = filepath.replace(src, dist, 1)        
-        leaf_dir = output_filepath[:-len(path.basename(output_filepath))]
-        if not path.exists(leaf_dir):
-            makedirs(leaf_dir)
-            
-        open(output_filepath, 'w').write(contents)
+    
+
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Build the website files')
