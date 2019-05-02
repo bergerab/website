@@ -1,3 +1,29 @@
 body {
     margin: 0 20%;
 }
+
+img.preview {
+    float: left;
+    height: 175px;
+}
+
+section.row {
+    display: inline-block;
+    width: 100%;
+}
+
+section.block {
+    display: inline-block;
+}
+
+img.drawing {
+    height: 200px;
+}
+
+a, u {
+    text-decoration: none;
+}
+
+nav > a {
+    margin-right: 10px;
+}
