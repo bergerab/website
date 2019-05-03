@@ -1,87 +1,384 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Frame Perfect</title>
-    </head>
-    <body>
-        <canvas id="stage" width="300" height="300"></canvas>
+<main>
+    <article>
+        <header>
+            <h1>Frame Perfect</h1>
+        </header>
+        <p>
+            "Frame perfect" is a term to describe the level of difficulty for an action in certain video games (Street Fighter, and various speed runs).
+            It has to do with the amount of time allowed for a player to send input to the game. When someone executes a frame perfect trick in a speed run
+            it is because they pressed the right button (or buttons) at just the right time. Typically within a 0.02 second time window.
+            Usually a game is difficult if it requires many frame perfect tricks or combos. Even after playing and watching games that use frame perfect tricks
+            as an indicator of skill, it has been unclear exactly how hard a frame perfect trick is. These games makes me question:
+        </p>
 
-        <script>
-         const canvas = document.getElementById('stage'),
-               ctx = canvas.getContext('2d'),
-               width = canvas.width,
-               height = canvas.height;
+        <p>
+            Is it possible for a person to execute frame perfect tricks reliably? If not, does someone's accuracy rely on chance?
+            If so, what chance does someone have to land a frame perfect trick? How much harder is it to land a one frame in
+            a 60FPS game vs a 30FPS game? What about a 120FPS game? What if the frame rate is not constant?
+        </p>
 
-         let keyDown = false;
-         document.addEventListener('keydown', function (e) {
-             if (e.key === ' ') {
-                 keyDown = true;
-             }
-         });
-         document.addEventListener('keyup', function (e) {
-             if (e.key === ' ') {
-                 keyDown = false;
-             }
-         });
+        <section>
+            <header>
+                <h2>What's a Frame</h2>
+            </header>
+            <p>
+                One degree of difficulty for a "frame perfect" trick relies on the update interval for the particular animation you're interacting with.
+                This update interval is called a "frame". The term "frame" can also refer to a single picture rendered as part of an animation; however,
+                for our purposes the rendering of these frames is unrelated to the update interval (although often they are on the same interval).
+                An update frame is the moment when physics simulations, and input checking is handled within the game. Currently, it is common for this
+                to occur at 60 Hz. This means that inputs to the game, collisions, delays, and other parts of the game's logic are checked every
+                0.01666 seconds.
+            </p>
+            <p>
+                There are games that use other update intervals, such as 30 Hz, and even games which have glitches that don't have stable update intervals. 
+            </p>
+        </section>
 
-         let t = new Date(),
-             keyDownTime = null,
-             failedCounter = 0,
-             successCounter = 0;
+        <section>
+            <header>
+                <h2>Why have Frame Perfect Tricks?</h2>
+            </header>
+            <p>
+                Frame perfect tricks exist for two reasons: to exploit programming errors, and a designed game mechanic. Both reasons
+                introduce a means for some players to perform better at the game if they are able to give the game an input within this small window
+                of one frame.
+            </p>
 
-         var jt = null,
-             lt = null;
-         
-         function loop() {
-             var now = new Date();
-             if (failedCounter > 0) {
-                 ctx.fillStyle = 'red';
-                 ctx.fillRect(0, 0, width, height);
-                 ctx.fillStyle = 'white';
-                 ctx.font = '40pt arial';
-                 ctx.fillText("Early", width/3, height/2);
-                 --failedCounter;
-             } else if (successCounter > 0) {
-                 ctx.fillStyle = 'green';
-                 ctx.fillRect(0, 0, width, height);
-                 ctx.fillStyle = 'white';
-                 ctx.font = '32pt arial';
-                 ctx.fillText("You got it!", width/5, height/2);
-                 --successCounter;
-             } else {
-                 ctx.fillStyle = 'blue';
-                 ctx.fillRect(0, 0, width, height);
-                 if (keyDown && !keyDownTime) {
-                     jt = new Date();
-                     keyDownTime = now;
-                     keyDown = false;
-                 }
+            <section>
+                <header>
+                    <h3>Exploits</h3>
+                </header>
+                <p>
+                    Some frame perfect tricks often because of some race condition
+                    or logic error. A game may accidentally allow for a player's character execute two inputs at once or in a succession
+                    in a way that was not intended. For example, a frame perfect jump command could allow for a player to jump twice instead
+                    of only once. The programming error behind many of these exploits involves updating a state after it is used for control flow:
+                </p>
+                <pre>
+                    <code>
+if (character.canJump && jump command was inputted) {
+    character.jump();
+}
+
+if (character.isStunned) {
+    character.canJump = false;
+}
+
+if (character.isHit) {
+    character.stun(1 second);
+}
+                    </code>
+                </pre>
+                <p>
+                    This error (and probably many of the one frame exploits in games) is exploitable because of how a flag is being set below when its usage. The intention of this code was
+                    that if the character is hit by an enemy, it is stunned for 1 second and as long as the character is stunned, it cannot jump. However, if the player inputs
+                    a jump command on the frame following being hit by an enemy, the player can jump before they are stunned. If inputed any later, the exploit will not work.
+                </p>
+                <p>
+                    The exploit above could be used in a speed run to continue moving your character even after being hit by an enemy.
+                    Perhaps there is a part of the game where it would typically be a slow route due to being stunned by enemies, but a frame perfect trick
+                    could turn what would have been a stun into a savings of 1 second.
+                    After such an exploit is found, the players who speed runs this imaginary game would then attempt to find places to execute this frame perfect trick
+                    to achieve a lower time for the speed run. The more frame perfect tricks a game has, the harder
+                    the speed run is. If a game has many frame perfect tricks, the skill cap (the amount of skill required to achieve the absolute best speed run time), is high which
+                    results in a more rewarding game.
+                </p>
+            </section>
+
+            <section>
+                <header>
+                    <h3>Skill Barrier</h3>
+                </header>
+                <p>
+                    Other games use frame perfect tricks on purpose to introduce a skill barrier. These games make it so that players who are better at executing the frame perfect tricks
+                    have a clear advantage over players who can't. Similar to how a first person shooter game places a skill barrier on aiming. Those who can aim better, will perform better
+                    at a first person shooter game.
+                </p>
+
+                <p>
+                    Fighting games such as Street Fighter are a good example of having a skill barrier on frame perfect tricks.
+                    In Street Fighter, players can input attack actions for their fighters, and several sequences of attacks can be linked together as a "combo". Different attacks allow for a certain
+                    number of frames that the next action of the combo is allowed. These windows of frames can be any number (such as 5 frame combo connections or a 1 frame combo connection),
+                    and there is always a delay associated with when the window of frames begins. For example if you use attack A, to connect a combo with attack B, you must wait for 200ms
+                    then input attack B within a window of frames after the delay.
+                </p>
+
+                <p>
+                    Frame perfect tricks are not limited to fighting games. A real-time strategy and platformer game can also have
+                    purposefully created frame perfect tricks. A 2D platformer which supports double jumps might
+                    have certain jumps that require a frame perfect double jumps (the second jump being at the peak of the first).
+                    In this case, every frame would calculate the acceleration of the character based on gravity and the strength of the jump,
+                    and there may be a platform to jump to which requires a jump at the exact top of the character's first jump. If there
+                    is only one frame where the character is at the peak of their jump, this would be a frame perfect trick.
+                </p>
+            </section>
+        </section>
+
+        <section>
+            <header>
+                <h2>Complications</h2>
+            </header>
+            <p>
+                For example, if some intense physics calculation is occurring, one frame could be extended and in turn push back the times of the other frames.
+            </p>
+        </section>
+
+        <section>
+            <header>
+                <h2>Probability</h2>
+            </header>
+            <p>
+                One question we set out to answer was "what chance does someone have to land a frame perfect trick?".
+                
+
+                We can answer this by first making an assumption.
+            </p>
+
+            <p>
+                Let's assume there is a frame perfect trick
+                somewhere within a 1000 ms (1 second) window. If the game updates at 60 Hz, then there is a window of 16.66 Hz in
+                that 1000 millisecond window where a frame perfect trick is possible. Then consider a player who has one random button
+                press within the 1000 ms window, in an attempt to get a frame perfect trick.
+            </p>
+            <p>
+                This would give us a probability of 16.66 / 1000 = 1.666% for a 1 second window. This is if the player
+                is clicking the button at random times, regardless of where the frame perfect interval is during that 1 second.
+            </p>
+            <p>
+                So it is safe to say, if you can accurately determine how long a 1 second window of time is you can hit a frame perfect trick
+                1.666% of the time.
+            </p>
+            <p>
+                The more accurate the player is to estimating how much time has passed since the beginning of the window, their chances of hitting
+                the frame perfect trick increases. Here is a probability matrix of chances based on the interval the player is capable of determining:
+            </p>
+            <table style="width:100%">
+                <tr>
+                    <th></th>
+                    <th>30 FPS</th> 
+                    <th>60 FPS</th>
+                    <th>120 FPS</th>
+                </tr>
+                <tr>
+                    <td>1000 ms</td>
+                    <td>3.33%</td> 
+                    <td>1.66%</td>
+                    <td>0.83%</td>
+                </tr>
+                <tr>
+                    <td>750 ms</td>
+                    <td>4.44%</td> 
+                    <td>2.22%</td>
+                    <td>1.11%</td>
+                </tr>
+                <tr>
+                    <td>500 ms</td>
+                    <td>6.66%</td> 
+                    <td>3.33%</td>
+                    <td>1.6%</td>
+                </tr>
+                <tr>
+                    <td>250 ms</td>
+                    <td>13.33%</td> 
+                    <td>6.66%</td>
+                    <td>3.32%</td>
+                </tr>
+                <tr>
+                    <td>100 ms</td>
+                    <td>33.33%</td> 
+                    <td>16.66%</td>
+                    <td>8.33%</td>
+                </tr>
+                <tr>
+                    <td>50 ms</td>
+                    <td>66.66%</td> 
+                    <td>33.33%</td>
+                    <td>16.66%</td>
+                </tr>
+                <tr>
+                    <td>25 ms</td>
+                    <td>100%</td> 
+                    <td>66.66%</td>
+                    <td>33.33%</td>
+                </tr>
+            </table>
+            <p>
+                The left column (interval column) applies to a player if they can accurately determine when an interval of that time has passed.
+                Imagine you were told to yell 500 ms after a light is flashed. This is what is meant by determining how long an interval is.
+                If you can determine 500 ms intervals, and you only have one click to guess when the frame perfect trick is, on a 60 fps game you
+                will hit the frame perfect trick 3.33% of the time. This is if you only have one chance.
+            </p>
+
+            <p>
+                There are frame perfect tricks that can be guessed using more than one button press. If you only must register a button press on the
+                correct frame, and failed button presses are allowed, our chances of landing a frame perfect trick increases greatly. Let's create another
+                probability matrix, this time with number of trials and all for a 60 Hz game.
+            </p>
+            <table style="width:100%">
+                <tr>
+                    <th></th>
+                    <th>1 Click</th> 
+                    <th>2 Clicks</th>
+                    <th>3 Clicks</th>
+                </tr>
+                <tr>
+                    <td>1000 ms</td>
+                    <td>1.66%</td> 
+                    <td>3.33%</td>
+                    <td>5%</td>
+                </tr>
+                <tr>
+                    <td>750 ms</td>
+                    <td>2.22%</td> 
+                    <td>4.44%</td>
+                    <td>6.66%</td>
+                </tr>
+                <tr>
+                    <td>500 ms</td>
+                    <td>3.33%</td> 
+                    <td>6.66%</td>
+                    <td>10%</td>
+                </tr>
+                <tr>
+                    <td>250 ms</td>
+                    <td>6.66%</td> 
+                    <td>13.33%</td>
+                    <td>20%</td>
+                </tr>
+                <tr>
+                    <td>100 ms</td>
+                    <td>16.66%</td> 
+                    <td>33.33%</td>
+                    <td>50%</td>
+                </tr>
+                <tr>
+                    <td>50 ms</td>
+                    <td>33.33%</td> 
+                    <td>66.66%</td>
+                    <td>100%</td>
+                </tr>
+                <tr>
+                    <td>25 ms</td>
+                    <td>66.66%</td> 
+                    <td>100%</td>
+                    <td>100%</td>
+                </tr>
+            </table>
+            <p>
+                This is a lower bound as we have assumed that these trials are completely independent. Doing so overcounts button presses because we count for the
+                unrealistic trials where the button is clicked at the exact same time during the same interval.
+            </p>
+        </section>
+
+        <section>
+            <header>
+                <h2>An Experiment</h2>
+            </header>
+
+
+            <figure>
+                <canvas id="stage" width="300" height="300"></canvas>
+                <script>
+                 const canvas = document.getElementById('stage'),
+                       ctx = canvas.getContext('2d'),
+                       width = canvas.width,
+                       height = canvas.height;
+
+                 document.addEventListener('keydown', function (e) {
+                     if (e.key === ' ') {
+                         keyDown = true;
+                     }
+                 });
+                 document.addEventListener('keyup', function (e) {
+                     if (e.key === ' ') {
+                         keyDown = false;
+                     }
+                 });
+
+                 let t = new Date(),
+                     keyDownTime = null,
+                     failedCounter = 0,
+                     successCounter = 0;
+
+                 var jt = null,
+                     lt = null;
                  
-                 if (keyDownTime !== null && now - keyDownTime <= 448) {
-                     if (keyDown) {
-                         keyDownTime = null;
-                         failedCounter = 20;
+                 window.keyDown = false;
+                 window.switchDelay = 450;
+                 window.loopDelay = 16.6666;
+
+                 function loop() {
+                     let delay = window.loopDelay;
+                     if (typeof delay === 'function') {
+                         delay = delay();
+                     }
+                     
+                     var now = new Date();
+                     if (failedCounter > 0) {
+                         ctx.fillStyle = 'red';
+                         ctx.fillRect(0, 0, width, height);
+                         ctx.fillStyle = 'white';
+                         ctx.font = '24pt Serif';
+                         const text = 'Early';
+                         ctx.fillText(text, -ctx.measureText(text).width/2 + width/2, height/2);
+                         failedCounter -= delay;
+                     } else if (successCounter > 0) {
+                         ctx.fillStyle = 'green';
+                         ctx.fillRect(0, 0, width, height);
+                         ctx.fillStyle = 'white';
+                         ctx.font = '24pt Serif';
+                         const text = 'Frame Perfect!';
+                         ctx.fillText(text, -ctx.measureText(text).width/2 + width/2, height/2);
+                         successCounter -= delay;
                      } else {
-                         ctx.fillStyle = 'yellow';
+                         ctx.fillStyle = 'blue';
+                         ctx.fillRect(0, 0, width, height);
+                         if (keyDown && !keyDownTime) {
+                             jt = new Date();
+                             keyDownTime = now;
+                             keyDown = false;
+                         }
+                         
+                         if (keyDownTime !== null && now - keyDownTime <= window.switchDelay) {
+                             if (keyDown) {
+                                 keyDownTime = null;
+                                 failedCounter = 500;
+                             } else {
+                                 ctx.fillStyle = 'yellow';
+                             }
+                             ctx.fillRect(0, 0, width, height);
+                         } else if (keyDownTime !== null) {
+                             if (keyDown) {
+                                 successCounter = 500;
+                             }
+                             lt = new Date();
+                             console.log('Frame took:', lt - jt, 'ms');
+                             keyDownTime = null;
+                         }
+                     }
 
-                     }
-                     ctx.fillRect(0, 0, width, height);
-                 } else if (keyDownTime !== null) {
-                     if (keyDown) {
-                         successCounter = 20;
-                     }
-                     lt = new Date();
-                     console.log(lt - jt);
-                     keyDownTime = null;
+                     keyDown = false;
+                     console.log(delay);
+                     setTimeout(loop, delay);
                  }
-             }
-             
-             keyDown = false;
-             requestAnimationFrame(loop);
-         }
-         requestAnimationFrame(loop);
-        </script>
-    </body>
-</html>
-
+                 setTimeout(loop, window.loopDelay);
+                </script>
+                <figcaption>
+                    <div>
+                        <button onclick="window.keyDown = true;">Click</button>
+                        <input onchange="window.switchAmount = value;" value="450"></input> ms
+                    </div>
+                    <select onchange="window.loopDelay = eval(value);">
+                        <option value="1/240 * 1000">240FPS</option>                                        
+                        <option value="1/120 * 1000">120FPS</option>                    
+                        <option value="1/60 * 1000" selected="selected">60FPS</option>
+                        <option value="() => 1/(Math.ceil((Math.random()*20)) + 40) * 1000">Random (40-60FPS)</option>
+                        <option value="1/30 * 1000">30FPS</option>
+                        <option value="1/10 * 1000">10FPS</option>
+                        <option value="1000">1FPS</option>
+                    </select>
+                </figcaption>
+            </figure>
+        </section>
+    </article>
+</main>

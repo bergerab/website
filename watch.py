@@ -1,7 +1,6 @@
 # keep hash of every file within given list of directories
 # if something in the list updates,
 # build.py to do a partial update of that file
-import hashlib
 import argparse
 from glob import glob
 import os

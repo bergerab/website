@@ -118,11 +118,7 @@ def build(src='./src', dist='./dist', build_dirs=None, with_deps=False):
         else:
             contents = open(filepath, 'rb').read()
             open(output_filepath, 'wb').write(contents)
-                
             
-    
-
-        
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Build the website files')
     parser.add_argument('paths', type=str, help='Paths to build', default=None, nargs='*')

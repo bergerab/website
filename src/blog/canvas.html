@@ -1,11 +1,16 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Canvas</title>
-    </head>
-    <body>
-        <canvas id="stage" width="500" height="500"></canvas>
+<main>
+    <article>
+        <header>
+            <h1>HTML Canvas Anti-Aliasing - Sometimes Things Don't Line Up</h1>
+        </header>
+        
+        <canvas id="stage" width="300" height="300"></canvas>
+        <style>
+         /* This is to stretch the canvas to make the anti-aliasing mor apparent */
+         #stage {
+             height: 500px;
+         }
+        </style>
 
         <script>
          const canvas = document.getElementById('stage'),
@@ -17,7 +22,7 @@
              function example(text, lineOffset=0) {
                  const textWidth = ctx.measureText(text).width,
                        textHeight = parseInt(ctx.font),
-                       textLeftPadding = textBottomPadding = 10,
+                       textLeftPadding = textBottomPadding = 5,
                        exampleLeftPadding = 20 + textLeftPadding,
                        lineWidth = 100,
                        lineHeight = 1;
@@ -47,11 +52,8 @@
                  
              ].map(f => f());
          }
-
-         ctx.font = '32px Arial';         
-         ctx.fillText('HTML Canvas Anti-Aliasing', 20, 30);
-         ctx.font = '24px Arial';                  
-         drawExamples(0, 40);
+         ctx.font = '12px Sarif';                  
+         drawExamples(0, 0);
         </script>
-    </body>
-</html>
+    </article>
+</main>

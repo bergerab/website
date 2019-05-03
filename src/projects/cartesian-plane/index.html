@@ -118,7 +118,13 @@
 
      for (const ec of equationConfigs) {
          let equation = ec.equation;
-         equation = equation.replace(' ', '').replace('\t', '').replace('\n', '').replace('\r', '').replace('cos', 'Math.cos').replace('sin', 'Math.sin').replace('tan', 'Math.tan');
+         equation = equation.replace(' ', '')
+                            .replace('\t', '')
+                            .replace('\n', '')
+                            .replace('\r', '')
+                            .replace('cos', 'Math.cos')
+                            .replace('sin', 'Math.sin')
+                            .replace('tan', 'Math.tan');
          if (equation.toString().startsWith('x=')) {
              ec.dvar = 'x';
          } else {
@@ -126,7 +132,8 @@
          }
          
          try {
-             ec.f = eval('x => ' + equation.substring(2));
+             const ivar = ec.dvar === 'x' ? 'y' : 'x';
+             ec.f = eval(ivar + ' => ' + equation.substring(2));
          } catch {}
      }
      const origin = {
@@ -189,19 +196,13 @@
              if (!ec.f) continue;
              
              if (ec.dvar === 'y') {
-                 var y = dvar;
-                 var x = ec.f(dvar);
+                 var y = -dvar;
+                 var x = -ec.f(dvar);
              } else {
-                 var y = ec.f(dvar)
-                 var x = dvar;
+                 var y = -ec.f(dvar)
+                 var x = -dvar;
              }
 
-             /*
-                if (Number.isNaN(y)) {
-                console.log(x, y);
-                }
-              */
-             
              let {x:cx, y:cy} = toCanvasPoint({x, y});
              if (cx > 0 && cy > 0 && cx < w && cy < h) {
                  points.push({x:cx, y:cy});
