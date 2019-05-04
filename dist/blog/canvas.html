@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Idiocode</title>
+        <meta name="description" content="Code, games, and sometimes art.">
+        <meta name="author" content="Adam Bertrand Berger">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../style.css">
+        <link rel="manifest"  href="../manifest.json"
+    </head>
+    <body>
+        <header>
+            <h1>Idiocode</h1>
+        </header>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../games/index.html">Games</a>
+            <a href="../blog/index.html">Blog</a>
+            <a href="../projects/index.html">Projects</a>
+            <a href="../drawings/index.html">Drawings</a>
+        </nav>
+        <main>
+    <article>
+        <header>
+            <h1>HTML Canvas Anti-Aliasing - Sometimes Things Don't Line Up</h1>
+        </header>
+        
+        <canvas id="stage" width="300" height="300"></canvas>
+        <style>
+         /* This is to stretch the canvas to make the anti-aliasing mor apparent */
+         #stage {
+             height: 500px;
+         }
+        </style>
+
+        <script>
+         const canvas = document.getElementById('stage'),
+               ctx = canvas.getContext('2d');
+
+         function drawExamples(x=0, y=0) {
+             let maxTextWidth = 0;
+
+             function example(text, lineOffset=0) {
+                 const textWidth = ctx.measureText(text).width,
+                       textHeight = parseInt(ctx.font),
+                       textLeftPadding = textBottomPadding = 5,
+                       exampleLeftPadding = 20 + textLeftPadding,
+                       lineWidth = 100,
+                       lineHeight = 1;
+                 
+                 maxTextWidth = Math.max(maxTextWidth, textWidth);
+                 
+                 return function () {
+                     y += textHeight + textBottomPadding;                 
+                     ctx.fillText(text, textLeftPadding + (maxTextWidth - textWidth), y);
+                     ctx.fillRect(exampleLeftPadding + maxTextWidth, y - (textHeight/3) + lineOffset, lineWidth, lineHeight);
+                 }
+             }
+
+             [
+                 example('No offset:'),
+                 example('0.1 Offset:', 0.1),
+                 example('0.2 Offset:', 0.2),
+                 example('0.3 Offset:', 0.3),
+                 example('0.4 Offset:', 0.4),
+                 example('0.5 Offset:', 0.5),
+                 example('0.5 Offset:', 0.5),
+                 example('0.6 Offset:', 0.6),
+                 example('0.7 Offset:', 0.7),
+                 example('0.8 Offset:', 0.8),
+                 example('0.9 Offset:', 0.9),
+                 example('Integer Offset:', 1),                                                    
+                 
+             ].map(f => f());
+         }
+         ctx.font = '12px Sarif';                  
+         drawExamples(0, 0);
+        </script>
+    </article>
+</main>
+
+        <script src="../site.js"></script>        
+    </body>
+</html>
