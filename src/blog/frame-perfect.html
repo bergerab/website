@@ -130,19 +130,23 @@ if (character.isHit) {
             <p>
                 One question we set out to answer was "what chance does someone have to land a frame perfect trick?".
                 
-
-                We can answer this by first making an assumption.
+                We can answer this by first making a few assumptions.
             </p>
+
+            <ul>
+                <li>Assumption 1: The user is able to click the button randomly.</li>
+                <li>Assumption 2: The user is able to guess with perfect accuracy a one second window that contains the target frame.</li>                
+            </ul>
 
             <p>
                 Let's assume there is a frame perfect trick
-                somewhere within a 1000 ms (1 second) window. If the game updates at 60 Hz, then there is a window of 16.66 Hz in
-                that 1000 millisecond window where a frame perfect trick is possible. Then consider a player who has one random button
-                press within the 1000 ms window, in an attempt to get a frame perfect trick.
+                somewhere within a one second window. If the game updates at 60 Hz, then there is a window of 16.66 ms in
+                that 1000 ms window where a frame perfect trick is possible. Then consider a player who has one random button
+                press within the one second window, in an attempt to get a frame perfect trick.
             </p>
             <p>
-                This would give us a probability of 16.66 / 1000 = 1.666% for a 1 second window. This is if the player
-                is clicking the button at random times, regardless of where the frame perfect interval is during that 1 second.
+                This would give us a probability of 16.66 / 1000 = 1.666% for a one second window. This is if the player
+                is clicking the button at random times, regardless of where the frame perfect interval is during that second.
             </p>
             <p>
                 So it is safe to say, if you can accurately determine how long a 1 second window of time is you can hit a frame perfect trick
