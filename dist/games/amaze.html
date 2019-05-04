@@ -1,0 +1,1106 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Idiocode</title>
+        <meta name="description" content="Code, games, and sometimes art.">
+        <meta name="author" content="Adam Bertrand Berger">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../style.css">
+        <link rel="manifest"  href="../manifest.json"
+    </head>
+    <body>
+        <header>
+            <h1>Idiocode</h1>
+        </header>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../games/index.html">Games</a>
+            <a href="../blog/index.html">Blog</a>
+            <a href="../projects/index.html">Projects</a>
+            <a href="../drawings/index.html">Drawings</a>
+        </nav>
+        
+<canvas id="maze" width="600" height="600"></canvas>
+
+
+<script>
+ function rm(A, e) {
+     var i = A.indexOf(e);
+     if (i !== -1) {
+         A.splice(i, 1);
+     }
+     return A;
+ }
+
+ const BUCKET = '[_]',
+       BALL = '●';
+
+ class Maze {
+     constructor(ctx, init = {}) {
+         this.ctx = ctx;
+         this.alg = init.alg || 'btm';
+
+         const n = this.n = init.n || 8;
+         this.showRoomNumbers = init.showRoomNumbers;
+         this.roomSize = init.roomSize || 50;
+         this.roomLineWidth = init.roomLineWidth || 1;
+
+         this.n = n;
+
+         this.colors = init.colors || ['red', 'blue', 'green', 'pink'];
+
+         this.screen = 0;
+         this.difficulty = 1;
+         this.mazeSelect = 0;
+         this.mazeSelectNumber = 0;
+         this.type = 0;
+         this.mode = 0;
+         this.maxInv = 1;
+
+
+
+         this.validate();
+         this.attachHandlers();
+     }
+
+     firstMove() {
+         this.startTime = new Date();
+     }
+
+     random() {
+         var x = Math.sin(this.seed++) * 10000;
+         return x - Math.floor(x);
+     }
+
+     initialize(initialSeed) {
+         if (this.mazeSelect === 1) {
+             initialSeed = this.mazeSelectNumber;
+         }
+
+         this.initialSeed = typeof initialSeed === 'undefined' ? Math.floor(Math.random() * 1000) : initialSeed;
+         this.seed = this.initialSeed;
+
+         if (this.difficulty === 0) {
+             this.colors = [
+                 'red',
+                 'blue',
+             ];
+         } else if (this.difficulty === 2) {
+             this.colors = [
+                 'blue',
+                 'green',
+                 'gray',
+                 'pink',
+                 'magenta',
+                 'brown',
+                 'lightgreen',
+                 'purple'
+             ];
+         } else if (this.difficulty === 3) {
+             this.colors = [
+                 'blue',
+                 'green',
+                 'gray',
+                 'pink',
+                 'magenta',
+                 'brown',
+                 'lightgreen',
+                 'purple',
+                 'orange',
+                 'red',
+                 'black',
+                 'cyan'
+             ];
+         } else {
+             this.colors = [
+                 'red', 'blue', 'green', 'pink'
+             ];
+         }
+
+         if (this.type === 0) {
+             this.alg = 'btm';
+         } else {
+             this.alg = 'kruskal';
+         }
+
+         this.startTime = null;
+         this.endTime = null;
+         this.moved = false;
+
+         this.G = this.generateGraph();
+
+         const V = this.G.shuffle(this.G.V);
+         for (const color of this.colors) {
+             let v = V.pop();
+             v.val = {
+                 color: color,
+                 label: BUCKET,
+             };
+             v = V.pop();
+             v.val = {
+                 color: color,
+                 label: BALL,
+             };
+         }
+
+         if (this.alg === 'kruskal') {
+             this.G.kruskal();
+         } else {
+             this.G.btm();
+         }
+         this.inv = [];
+
+         this.points = 0;
+         this.solved = new Set();
+
+         this.randomRoom();
+     }
+
+     generateGraph() {
+         const G = new Graph([], [], () => this.random()),
+               n = this.n,
+               s = n / 2,
+               ss = s * s,
+               ns = n * n;
+
+         for (var i = 0; i < ns; ++i) {
+             G.vertex(i);
+         }
+
+         for (const node of G.V) {
+             const v = node.label,
+                   x = v % s,
+                   y = Math.floor((v / n) % s),
+                   qr = v % n > s - 1,
+                   qd = v >= ns / 2,
+                   q = qr && qd ? 3 : qr && !qd ? 1 : qd && !qr ? 2 : 0;
+
+             let l = [v, v - 1],
+                 r = [v, v + 1],
+                 u = [v, v - s * 2],
+                 d = [v, v + s * 2];
+
+             if (q === 0) {
+                 if (x === 0) {
+                     l = [v, v + (ss + ss + s + (s - 1))];
+                 }
+                 if (y === 0) {
+                     u = [v, v + (ss + ss + ss + ss - s)];
+                 }
+             } else if (q === 1) {
+                 if (x === 3) {
+                     r = [v, v + (ss + s + s + 1)];
+                 }
+                 if (y === 0) {
+                     u = [v, v + (ss + ss + ss + s)];
+                 }
+             } else if (q === 2) {
+                 if (x === 0) {
+                     l = [v, v - (ss + s + s + 1)];
+                 }
+                 if (y === 3) {
+                     d = [v, s + (v % s)];
+                 }
+             } else if (q === 3) {
+                 if (x === 3) {
+                     r = [v, -(ss + ss + s + (s - 1)) + v];
+                 }
+                 if (y === 3) {
+                     d = [v, -(ss + ss + ss + ss - s) + v];
+                 }
+             }
+
+             const add = (d, l) => G.edge(...(d.map(x => new Vertex(x))), l, true);
+             add(l, 'l');
+             add(r, 'r');
+             add(u, 'u');
+             add(d, 'd');
+         }
+
+         return G;
+     }
+
+     up() {
+         this.go('u');
+     }
+
+     down() {
+         this.go('d');
+     }
+
+     left() {
+         this.go('l');
+     }
+
+     right() {
+         this.go('r');
+     }
+
+     randomRoom() {
+         const V = this.G.V;
+         this.room = V[Math.floor(this.random() * this.G.n)];
+         this.draw();
+     }
+
+     go(label) {
+         const v = this.room;
+         for (const edge of this.G.E) {
+             if (edge.u.label === v.label) {
+                 if (edge.label === label && !edge.val) {
+                     this.room = this.G.getVertex(edge.v.label);
+                     this.draw();
+                     return;
+                 }
+             }
+         }
+     }
+
+     draw() {
+         ctx.clearRect(0, 0, canvas.width, canvas.height);
+         const size = this.roomSize,
+               offsetX = 100,
+               offsetY = 50;
+
+         const box = (x, y, w, h) => {
+             ctx.beginPath();
+             ctx.moveTo(x, y);
+             ctx.lineTo(x, y + h);
+             ctx.lineTo(x + w, y + h);
+             ctx.lineTo(x + w, y);
+             ctx.lineTo(x, y);
+             ctx.stroke();
+
+             ctx.fillStyle = 'white';
+             ctx.fillRect(x, y, w, h);
+
+             ctx.fillStyle = 'black';
+         };
+
+         if (this.gameStarted) {
+
+             if (this.mode === 0) {
+                 ctx.lineWidth = this.roomLineWidth;
+
+                 const hash = (a, b) => a >= b ? a * a + a + b : a + b * b;
+                 let prevX = 0,
+                     prevY = 0;
+                 const drawn = new Set();
+                 const draw = (M, d, x, y) => {
+                     const h1 = hash(hash(prevX, prevY), hash(x, y));
+                     const h2 = hash(hash(x, y), hash(prevX, prevY));
+
+                     if (M.get(d) && !drawn.has(h1) && !drawn.has(h2)) {
+                         drawn.add(h1);
+                         ctx.lineTo(x, y);
+                     } else {
+                         ctx.moveTo(x, y);
+                     }
+                     prevX = x;
+                     prevY = y;
+                 };
+
+                 for (const v of this.G.V) {
+                     ctx.beginPath();
+                     let x = (v.label % this.n) * size + offsetX,
+                         y = Math.floor(v.label / this.n) * size + offsetY;
+
+                     const M = new Map(this.G.directEdges(v).map(x => [x.label, x.val]));
+                     const lw = ctx.lineWidth;
+                     ctx.moveTo(x, y);
+                     prevX = x;
+                     prevY = y;
+                     draw(M, 'u', x + size, y);
+                     draw(M, 'r', x + size, y + size);
+                     draw(M, 'd', x, y + size);
+                     draw(M, 'l', x, y);
+
+                     if (v.label === this.room.label) {
+                         ctx.fillStyle = 'lightblue';
+                         ctx.fillRect(x + ctx.lineWidth, y + ctx.lineWidth, size - ctx.lineWidth * 2, size - ctx.lineWidth * 2);
+                     }
+
+                     if (this.showRoomNumbers) {
+                         ctx.font = '8pt Arial';
+                         ctx.fillStyle = 'gray';
+                         ctx.fillText(v.label, (x + size / 2) - 5, (y + size / 2) + 4);
+                     }
+
+                     if (v.val !== null) {
+                         ctx.fillStyle = v.val.color;
+                         ctx.font = '16pt Arial';
+                         if (v.val.label === BALL || this.solved.has(v.val.color)) {
+                             ctx.fillText(BALL, (x + size / 2) - 5, (y + size / 2) + 4);
+                         }
+
+                         if (v.val.label === BUCKET) {
+                             ctx.fillText(BUCKET, (x + size / 2) - 10, (y + size / 2) + 4);
+                         }
+                     }
+
+                     ctx.stroke();
+                 }
+             } else {
+                 ctx.clearRect(0, 0, 1000, 1000);
+                 ctx.fillStyle = 'gray';
+                 const lw = ctx.lineWidth;
+                 const mx = offsetX + (this.roomSize * this.n),
+                       my = offsetY + (this.roomSize * this.n);
+                 ctx.beginPath();
+                 for (const uv of this.G.directEdges(this.room)) {
+                     if (uv.val) {
+                         if (uv.label === 'u') {
+                             ctx.moveTo(offsetX, offsetY);
+                             ctx.lineTo(mx, offsetY);
+
+                         } else if (uv.label === 'r') {
+                             ctx.moveTo(mx, offsetY);
+                             ctx.lineTo(mx, my);
+
+                         } else if (uv.label === 'd') {
+                             ctx.moveTo(mx, my);
+                             ctx.lineTo(offsetX, my);
+
+                         } else if (uv.label === 'l') {
+                             ctx.moveTo(offsetX, offsetY);
+                             ctx.lineTo(offsetX, my);
+
+                         }
+                     }
+                 }
+                 ctx.stroke();
+
+                 if (this.room.val !== null) {
+                     ctx.fillStyle = this.room.val.color;
+                     ctx.font = '64pt Arial';
+                     if (this.room.val.label === BALL) {
+                         ctx.fillText(BALL, 70 + (this.n * this.roomSize) / 2, 70 + (this.n * this.roomSize) / 2);
+                     }
+
+                     if (this.room.val.label === BUCKET && !this.solved.has(this.room.val.color)) {
+                         ctx.fillText(BUCKET, 50 + (this.n * this.roomSize) / 2, 70 + (this.n * this.roomSize) / 2);
+                     }
+                 }
+             }
+
+             ctx.font = '13pt Arial';
+             ctx.fillStyle = 'black';
+
+             box(85, canvas.height - 120, 440, 60);
+
+             if (this.points < this.colors.length) {
+                 if (this.inv.length === 0) {
+                     ctx.fillText('Your inventory is empty.', 100, canvas.height - 100);
+                 } else {
+                     ctx.fillText('Inventory: ', 100, canvas.height - 100);
+
+                     let i = 0;
+                     for (const item of this.inv) {
+                         ctx.font = '13pt Arial';
+                         ctx.fillStyle = item.color;
+                         i += 1;
+                         ctx.fillText(item.label, 165 + (i * 20), canvas.height - 100);
+                     }
+                 }
+
+             } else {
+                 ctx.font = '13pt Arial';
+                 ctx.fillStyle = 'blue';
+                 ctx.fillText('You win! Press enter to play again.', 100, canvas.height - 100);
+
+             }
+
+             if (this.points < this.colors.length) {
+                 ctx.font = '13pt Arial';
+                 ctx.fillStyle = 'black';
+                 ctx.fillText('You have ' + this.points + (this.points === 1 ? ' point. ' : ' points.'), 100, canvas.height - 70);
+             } else {}
+
+             if (this.startTime !== null) {
+                 ctx.font = '13pt Arial';
+                 ctx.fillStyle = 'black';
+                 let time = new Date() - this.startTime;
+                 if (this.endTime !== null) {
+                     time = this.endTime - this.startTime;
+                 }
+                 time = Math.floor(time / 1000);
+
+                 const s = time.toString();
+
+                 ctx.fillText(time, canvas.width - 90 - (s.length * 10), canvas.height - 100);
+             }
+
+             ctx.font = '13pt Arial';
+             ctx.fillStyle = 'black';
+             let cnum = 0;
+             if (this.difficulty === 0) {
+                 cnum = 2;
+             } else if (this.difficulty === 1) {
+                 cnum = 4;
+             } else if (this.difficulty === 2) {
+                 cnum = 8;
+             } else {
+                 cnum = 12;
+             }
+
+             let mode = null;
+             if (this.mode === 0) {
+                 mode = 'F';
+             } else {
+                 mode = 'NF';
+             }
+
+             ctx.fillStyle = 'gray';
+             ctx.fillText('Maze #' + this.initialSeed, canvas.width - 145 - (this.initialSeed.toString().length * 10), canvas.height - 70);
+             ctx.fillStyle = 'black';
+         } else {
+
+             ctx.lineWidth = this.roomLineWidth;
+
+             this.G = this.generateGraph();
+             this.seed = this.screen;
+             this.G.btm();
+
+             const msize = size;
+
+             // draw background (copied from real draw of game)
+             const hash = (a, b) => a >= b ? a * a + a + b : a + b * b;
+             let prevX = 0,
+                 prevY = 0;
+             const drawn = new Set();
+             const draw = (M, d, x, y) => {
+                 const h1 = hash(hash(prevX, prevY), hash(x, y));
+                 const h2 = hash(hash(x, y), hash(prevX, prevY));
+
+                 if (M.get(d) && !drawn.has(h1) && !drawn.has(h2)) {
+                     drawn.add(h1);
+                     ctx.lineTo(x, y);
+                 } else {
+                     ctx.moveTo(x, y);
+                 }
+                 prevX = x;
+                 prevY = y;
+             };
+
+             for (const v of this.G.V) {
+                 ctx.beginPath();
+                 let x = (v.label % this.n) * msize + offsetX,
+                     y = Math.floor(v.label / this.n) * msize + offsetY + 20;
+
+                 const M = new Map(this.G.directEdges(v).map(x => [x.label, x.val]));
+                 const lw = ctx.lineWidth;
+                 ctx.moveTo(x, y);
+                 prevX = x;
+                 prevY = y;
+                 draw(M, 'u', x + msize, y);
+                 draw(M, 'r', x + msize, y + msize);
+                 draw(M, 'd', x, y + msize);
+                 draw(M, 'l', x, y);
+
+                 ctx.stroke();
+             }
+
+
+             if (this.screen === -1) {
+
+             } else if (this.screen === 0) {
+
+                 box(50, 220, 500, 100);
+
+                 ctx.font = '64pt Arial';
+                 ctx.fillStyle = 'black';
+                 ctx.fillText('So Amaze', (canvas.width / 2) - 200, canvas.height / 2);
+                 ctx.fillStyle = 'black';
+                 ctx.font = '12pt Arial';
+
+                 box(220, 320, 155, 60);
+                 ctx.fillText('Press enter to start', (canvas.width / 2) - 70, (canvas.height / 2) + 40);
+                 ctx.fillText('Press "h" for help', (canvas.width / 2) - 70, (canvas.height / 2) + 65);
+
+
+
+             } else if (this.screen === 1) {
+                 box((canvas.width / 2) - 100, (canvas.height / 2) - 150, 200, 230);
+
+                 ctx.font = '24pt Arial';
+                 ctx.fillText('Colors', (canvas.width / 2) - 70, (canvas.height / 2) - 100);
+
+                 ctx.font = '14pt Arial';
+                 let height = 0;
+
+                 const option = (d, t) => {
+                     const x = (canvas.width / 2) - 70,
+                           y = (canvas.height / 2) - 100 + (height += 40);
+                     if (d === this.difficulty) {
+                         ctx.fillRect(x, y + 5, 12, 2);
+                     }
+                     ctx.fillText(t, x, y);
+                 };
+
+                 option(0, '2');
+                 option(1, '4');
+                 option(2, '8');
+                 option(3, '12');
+
+             } else if (this.screen === 2) {
+                 box((canvas.width / 2) - 100, (canvas.height / 2) - 150, 250, 230);
+
+                 ctx.font = '24pt Arial';
+                 ctx.fillText('Inventory Size', (canvas.width / 2) - 70, (canvas.height / 2) - 100);
+                 ctx.font = '14pt Arial';
+                 let height = 0;
+                 const option = (d, t) => {
+                     const x = (canvas.width / 2) - 70,
+                           y = (canvas.height / 2) - 100 + (height += 40);
+                     if (d === this.maxInv) {
+                         ctx.fillRect(x, y + 5, 12, 2);
+                     }
+                     ctx.fillText(t, x, y);
+                 };
+                 option(1, '1');
+                 option(2, '2');
+                 option(3, '3');
+                 option(Infinity, 'Infinity');
+             } else if (this.screen === 3) {
+                 box((canvas.width / 2) - 100, (canvas.height / 2) - 150, 235, 170);
+
+                 ctx.font = '24pt Arial';
+                 ctx.fillText('Mode', (canvas.width / 2) - 70, (canvas.height / 2) - 100);
+                 ctx.font = '14pt Arial';
+                 let height = 0;
+                 const option = (d, t) => {
+                     const x = (canvas.width / 2) - 70,
+                           y = (canvas.height / 2) - 100 + (height += 40);
+                     if (d === this.mode) {
+                         ctx.fillRect(x, y + 5, 12, 2);
+                     }
+                     ctx.fillText(t, x, y);
+                 };
+                 option(0, 'Fun');
+                 option(1, 'Not Fun');
+
+             } else if (this.screen === 4) {
+                 box((canvas.width / 2) - 100, (canvas.height / 2) - 150, 235, 170);
+
+                 ctx.font = '24pt Arial';
+                 ctx.fillText('Type', (canvas.width / 2) - 70, (canvas.height / 2) - 100);
+                 ctx.font = '14pt Arial';
+                 let height = 0;
+                 const option = (d, t) => {
+                     const x = (canvas.width / 2) - 70,
+                           y = (canvas.height / 2) - 100 + (height += 40);
+                     if (d === this.type) {
+                         ctx.fillRect(x, y + 5, 12, 2);
+                     }
+                     ctx.fillText(t, x, y);
+                 };
+                 option(0, 'Snake');
+                 option(1, 'Open');
+
+             } else if (this.screen === 5) {
+                 box((canvas.width / 2) - 100, (canvas.height / 2) - 150, 235, 170);
+
+                 ctx.font = '24pt Arial';
+                 ctx.fillText('Maze', (canvas.width / 2) - 70, (canvas.height / 2) - 100);
+                 ctx.font = '14pt Arial';
+                 let height = 0;
+                 const option = (d, t) => {
+                     const x = (canvas.width / 2) - 70,
+                           y = (canvas.height / 2) - 100 + (height += 40);
+                     if (d === this.mazeSelect) {
+                         ctx.fillRect(x, y + 5, 12, 2);
+                     }
+                     ctx.fillText(t, x, y);
+                 };
+                 option(0, 'Random');
+                 option(1, 'Enter Maze #' + this.mazeSelectNumber);
+             }
+
+
+         }
+     }
+
+     validate() {
+         const n = this.n;
+         if (n < 8) {
+             console.error('`n` must be greater than or equal to 8');
+         } else if (n % 2 !== 0) {
+             console.error('`n` must be an even number');
+         } else if (Math.floor(Math.sqrt(n / 2)) !== Math.sqrt(n / 2)) {
+             console.error('`n`/2 must be a perfect square');
+         }
+     }
+
+     attachHandlers() {
+         let num = '',
+             mnum = '';
+         window.onkeydown = (e) => {
+             if (e.key === 'q') {
+                 this.gameStarted = false;
+                 this.screen = 0;
+                 return;
+             }
+
+             if (this.gameStarted) {
+                 if (e.key === 'ArrowLeft') {
+                     this.left();
+                     if (!this.moved) {
+                         this.firstMove();
+                         this.moved = true;
+                     }
+                 } else if (e.key === 'ArrowRight') {
+                     this.right();
+                     if (!this.moved) {
+                         this.firstMove();
+                         this.moved = true;
+                     }
+                 } else if (e.key === 'ArrowUp') {
+                     this.up();
+                     if (!this.moved) {
+                         this.firstMove();
+                         this.moved = true;
+                     }
+                 } else if (e.key === 'ArrowDown') {
+                     this.down();
+                     if (!this.moved) {
+                         this.firstMove();
+                         this.moved = true;
+                     }
+                 } else if (e.key === 'Enter' || e.key === ' ') {
+                     if (this.endTime) {
+                         this.initialize();
+                     } else {
+                         if (this.room.val !== null) {
+                             if (this.room.val.label === BALL) {
+                                 if (this.inv.length < this.maxInv) {
+                                     this.inv.push(this.room.val);
+                                     this.room.val = null;
+                                 }
+                             } else {
+                                 let hasBall = false;
+                                 for (const ball of this.inv) {
+                                     if (ball.color === this.room.val.color) {
+                                         hasBall = true;
+                                         rm(this.inv, ball);
+                                         this.solved.add(ball.color);
+                                     }
+                                 }
+                                 if (hasBall) {
+                                     this.points += 1;
+
+                                     if (this.points === this.colors.length) {
+                                         this.endTime = new Date();
+                                     }
+                                 }
+                             }
+                             this.draw();
+                         }
+                         if (!this.moved) {
+                             this.firstMove();
+                             this.moved = true;
+                         }
+                     }
+                 } else if (e.key === 'm') {
+                     const n = Math.min(+num, 1000);
+                     this.initialize(n);
+                     num = '';
+                 } else if (e.key === 'n') { // new maze
+                     this.mazeSelect = 0;
+                     this.initialize();
+                 } else if (e.key === 'r') { // retry maze
+                     this.initialize(this.initialSeed);
+                 } else if ('1234567890'.indexOf(e.key) > -1) {
+                     num += e.key;
+                 }
+             } else {
+                 if (this.screen === 0) {
+                     if (e.key === 'Enter' || e.key === 'Space' || e.key === 'ArrowRight') {
+                         this.screen = 1;
+                     }
+                 } else if (this.screen === 1) {
+                     if (e.key === 'ArrowDown') {
+                         this.difficulty = Math.min(this.difficulty + 1, 3);
+                     } else if (e.key === 'ArrowUp') {
+                         this.difficulty = Math.max(this.difficulty - 1, 0);
+                     } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
+                         this.screen += 1;
+                     } else if (e.key === 'ArrowLeft') {
+                         this.screen -= 1;
+                     }
+                 } else if (this.screen === 2) {
+                     if (e.key === 'ArrowUp') {
+                         if (this.maxInv !== Infinity && this.maxInv > 1) {
+                             this.maxInv -= 1;
+                         } else if (this.maxInv === Infinity) {
+                             this.maxInv = 3;
+                         }
+                     } else if (e.key === 'ArrowDown') {
+                         if (this.maxInv < 3) {
+                             this.maxInv += 1;
+                         } else if (this.maxInv === 3) {
+                             this.maxInv = Infinity;
+                         }
+                     } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
+                         this.screen += 1;
+                     } else if (e.key === 'ArrowLeft') {
+                         this.screen -= 1;
+                     }
+                 } else if (this.screen === 3) {
+                     if (e.key === 'ArrowUp') {
+                         this.mode = 0;
+                     } else if (e.key === 'ArrowDown') {
+                         this.mode = 1;
+                     } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
+                         this.screen += 1;
+                     } else if (e.key === 'ArrowLeft') {
+                         this.screen -= 1;
+                     }
+                 } else if (this.screen === 4) {
+                     if (e.key === 'ArrowUp') {
+                         this.type = 0;
+                     } else if (e.key === 'ArrowDown') {
+                         this.type = 1;
+                     } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
+                         this.screen += 1;
+                     } else if (e.key === 'ArrowLeft') {
+                         this.screen -= 1;
+                     }
+                 } else if (this.screen === 5) {
+                     if (e.key === 'ArrowUp') {
+                         this.mazeSelect = 0;
+                     } else if (e.key === 'ArrowDown') {
+                         this.mazeSelect = 1;
+                     } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
+                         this.gameStarted = true;
+                         this.initialize();
+                     } else if (e.key === 'ArrowLeft') {
+                         this.screen -= 1;
+                     } else if (this.mazeSelect === 1 && '1234567890'.indexOf(e.key) > -1) {
+                         if (mnum.length < 8) {
+                             mnum += e.key;
+                         }
+                         const n = +mnum;
+                         this.mazeSelectNumber = n;
+                     } else if (this.mazeSelect === 1 && e.key === 'Backspace') {
+                         mnum = mnum.substring(0, mnum.length - 1);
+                         this.mazeSelectNumber = +mnum;
+                     }
+                 }
+
+             }
+         };
+     }
+ }
+
+ class Graph {
+     constructor(E = [], V = [], random) {
+         this.E = E;
+         this.V = V;
+
+         this.random = random;
+
+         this.n = V.length;
+         this.m = E.length;
+     }
+
+     breakWall(u, v) {
+         const uv = this.getEdge(u, v);
+         uv.val = false;
+     }
+
+     edge(u, v, label = null, val = null) {
+         this.E.push(new Edge(u, v, label, val));
+         this.m += 1;
+     }
+
+     vertex(label = null, val = null) {
+         this.V.push(new Vertex(label, val));
+         this.n += 1;
+     }
+
+     directEdges(v) {
+         const E = [];
+         for (const e of this.E) {
+             if (e.u.label === v.label) {
+                 E.push(e);
+             }
+         }
+         return E;
+     }
+
+     edges(v) {
+         const E = [];
+         for (const e of this.E) {
+             if (e.u.label === v.label || e.v.label === v.label) {
+                 E.push(e);
+             }
+         }
+         return E;
+     }
+
+     getEdge(u, v) {
+         for (const e of this.E) {
+             if (e.u.label === u.label && e.v.label === v.label) {
+                 return e;
+             }
+         }
+         return null;
+     }
+
+     getVertex(label) {
+         for (const v of this.V) {
+             if (label === v.label) {
+                 return v;
+             }
+         }
+         return null;
+     }
+
+     incidentVertices(v) {
+         const E = this.directEdges(v),
+               V = new Map();
+
+         for (const e of E) {
+             V.set(e.v.label, e.v);
+         }
+
+         V.delete(v.label);
+
+         return V.values();
+     }
+
+     shuffle(OL) {
+         const L = [...OL];
+
+         for (let i = 0; i < L.length - 2; ++i) {
+             const j = Math.floor(this.random() * L.length);
+             const temp = L[i];
+             L[i] = L[j];
+             L[j] = temp;
+         }
+
+         return L;
+     }
+
+     btm() {
+         const SEEN = new Set(),
+               S = [],
+               V = this.V,
+               E = this.E;
+
+         let u = this.shuffle(V)[0];
+         SEEN.add(u.label);
+
+         while (SEEN.size !== V.length) {
+             let notVisited = null;
+             const incidents = this.shuffle(this.incidentVertices(u));
+             for (const v of incidents) {
+                 if (!SEEN.has(v.label)) {
+                     notVisited = v;
+                 }
+             }
+
+             if (notVisited !== null) {
+                 const v = notVisited;
+
+                 S.push(v);
+
+                 this.breakWall(u, v);
+                 this.breakWall(v, u);
+
+                 u = v;
+                 SEEN.add(u.label);
+
+             } else if (S.length > 0) {
+                 u = S.pop();
+             }
+         }
+     }
+
+     prims() {
+         const SEEN = new Set(),
+               L = [],
+               V = this.V,
+               E = this.E;
+
+         let u = this.shuffle(V)[0];
+         SEEN.add(u.label);
+         L.push(u);
+
+         while (L.length > 0) {
+             const v = L.pop();
+
+             const us = this.shuffle(this.incidentVertices(v));
+
+             for (const u of us) {
+                 if (!SEEN.has(u.label)) {
+                     L.push(u);
+                 }
+             }
+
+             let u = null;
+             for (const u of us) {
+                 if (!SEEN.has(u.label)) {
+                     this.breakWall(u, v);
+                     this.breakWall(v, u);
+
+                     SEEN.add(u.label);
+                     break;
+                 }
+             }
+         }
+     }
+
+     kruskal() {
+         // Randomized Kruskal's algorithm
+         const W = this.shuffle(this.E),
+               C = new Map();
+
+         for (const v of this.V) {
+             C.set(v.label, new Set([v]));
+         }
+
+         for (let i = 0; i < W.length; ++i) {
+             const w = W[i];
+
+             const U = C.get(w.u.label),
+                   V = C.get(w.v.label),
+                   J = new Set([...(C.get(w.u.label).values()), ...(C.get(w.v.label).values())]);
+
+             let distinct = true;
+             for (const u of U.values()) {
+                 for (const v of V.values()) {
+                     if (v.label === u.label) {
+                         distinct = false;
+                     }
+                 }
+             }
+
+             if (distinct) {
+                 this.breakWall(w.u, w.v);
+                 this.breakWall(w.v, w.u);
+
+                 C.set(w.u.label, J);
+                 C.set(w.v.label, J);
+             }
+         }
+
+         return C;
+     }
+ }
+
+ class Edge {
+     constructor(u, v, label = null, val = null) {
+         this.u = u;
+         this.v = v;
+         this.label = label;
+         this.val = val;
+     }
+ }
+
+ class Vertex {
+     constructor(label = null, val = null) {
+         this.label = label;
+         this.val = val;
+     }
+ }
+
+ const canvas = document.getElementById('maze'),
+       ctx = canvas.getContext('2d');
+
+ if (window.innerHeight > window.innerWidth) {
+     canvas.style.width = '100%';
+ } else {
+     canvas.style.height = '100%';
+ }
+
+ let maze = new Maze(ctx);
+
+ function render() {
+     if (typeof(maze) === 'object') {
+         if (maze.draw) {
+             maze.draw();
+         }
+     }
+
+     requestAnimationFrame(render);
+ }
+ render();
+
+ // https://stackoverflow.com/questions/2264072/detect-a-finger-swipe-through-javascript-on-the-iphone-and-android
+ document.addEventListener('touchstart', handleTouchStart, false);
+ document.addEventListener('touchmove', handleTouchMove, false);
+
+ canvas.addEventListener('click', function() {
+     window.onkeydown({
+         key: 'Enter',
+     });
+ });
+
+ var xDown = null;
+ var yDown = null;
+
+ function getTouches(evt) {
+     return evt.touches || // browser API
+            evt.originalEvent.touches; // jQuery
+ }
+
+ function handleTouchStart(evt) {
+     const firstTouch = getTouches(evt)[0];
+     xDown = firstTouch.clientX;
+     yDown = firstTouch.clientY;
+     return false;
+ };
+
+ function handleTouchMove(evt) {
+     if (!xDown || !yDown) {
+         return;
+     }
+
+     var xUp = evt.touches[0].clientX;
+     var yUp = evt.touches[0].clientY;
+
+     var xDiff = xDown - xUp;
+     var yDiff = yDown - yUp;
+
+     if (Math.abs(xDiff) > Math.abs(yDiff)) {
+         /*most significant*/
+         if (xDiff > 0) {
+             /* left swipe */
+             window.onkeydown({
+                 key: 'ArrowLeft',
+             });
+
+         } else {
+             /* right swipe */
+             window.onkeydown({
+                 key: 'ArrowRight',
+             });
+         }
+     } else {
+         if (yDiff > 0) {
+             /* up swipe */
+             window.onkeydown({
+                 key: 'ArrowUp',
+             });
+
+         } else {
+             /* down swipe */
+             window.onkeydown({
+                 key: 'ArrowDown',
+             });
+
+         }
+     }
+     /* reset values */
+     xDown = null;
+     yDown = null;
+
+     return false;
+ };
+
+</script>
+
+        <script src="../site.js"></script>        
+    </body>
+</html>

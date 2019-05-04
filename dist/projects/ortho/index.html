@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Idiocode</title>
+        <meta name="description" content="Code, games, and sometimes art.">
+        <meta name="author" content="Adam Bertrand Berger">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../../style.css">
+        <link rel="manifest"  href="../../manifest.json"
+    </head>
+    <body>
+        <header>
+            <h1>Idiocode</h1>
+        </header>
+        <nav>
+            <a href="../../index.html">Home</a>
+            <a href="../../games/index.html">Games</a>
+            <a href="../../blog/index.html">Blog</a>
+            <a href="../../projects/index.html">Projects</a>
+            <a href="../../drawings/index.html">Drawings</a>
+        </nav>
+        <script src="matrix.js"></script>
+<script src="vector.js"></script>
+<script src="off.js"></script>
+<script src="objects.js"></script>                                
+<script src="core.js"></script>                        
+<canvas id="stage" width="700" height="700"></canvas>
+
+<div id="demos">
+    Demos:
+    <button onclick="demo('cube')">Cube</button>
+    <button onclick="demo('triangle')">Triangle</button>
+    <button onclick="demo('rectangle')">Rectangle</button>
+    <button onclick="demo('pyramid')">Pyramid</button>
+    <button onclick="demo('cubeGrid')">Cube Grid</button>
+    <button onclick="demo('dragon')">Dragon Skull (OFF File)</button>        
+</div>
+
+<div id="settings">
+    Settings:
+    <button onclick="setting('origin')">Show Origin</button>
+    <button onclick="setting('plane')">Show Plane</button>
+    <button onclick="setting('animate')">Animate</button>
+</div>
+
+<script src="demo.js"></script>
+
+        <script src="../../site.js"></script>        
+    </body>
+</html>

@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Idiocode</title>
+        <meta name="description" content="Code, games, and sometimes art.">
+        <meta name="author" content="Adam Bertrand Berger">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../style.css">
+        <link rel="manifest"  href="../manifest.json"
+    </head>
+    <body>
+        <header>
+            <h1>Idiocode</h1>
+        </header>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../games/index.html">Games</a>
+            <a href="../blog/index.html">Blog</a>
+            <a href="../projects/index.html">Projects</a>
+            <a href="../drawings/index.html">Drawings</a>
+        </nav>
+        
+<canvas id="stage" width="600" height="600"></canvas>
+
+<script>
+ const canvas = document.getElementById('stage'),
+       ctx = canvas.getContext('2d');
+
+ class Cell {
+     constructor(val) {
+         this.shown = false;
+         this.val = val;
+         this.flagged = false;
+     }
+
+     show() {
+         this.shown = true;
+     }
+
+     getLabel() {
+         if (this.shown) {
+             return this.val.toString();
+         } else if (this.flagged) {
+             return '⚑';
+         } if (!this.shown) {
+             return ' ';
+         }
+     }
+     
+     toggleFlag() {
+         if (!this.shown) {
+             this.flagged = !this.flagged;
+         }
+     }
+
+     isBomb() {
+         return false;
+     }
+ }
+
+ class Bomb extends Cell {
+     constructor() {
+         super('B');
+     }
+
+     isBomb() {
+         return true;
+     }
+ }
+
+ class Game {
+     constructor(init={}) {
+         const boxSize = 10;
+         
+         this.size = init.size || 10;
+         
+         this.bombs = init.bombs;
+         if (this.bombs === undefined) {
+             this.bombs = Math.ceil((this.size*this.size)/10);
+         }
+         
+         this.padding = (canvas.height/2)-(this.size*boxSize);//canvas.width-(this.size*30);
+         this.marginBottom = 75;
+
+         this.initialize();
+
+         this.draw();
+         this.attachHandlers();
+     }
+
+     incrementBombCells() {
+         const increment = (x, y) => {
+             const cell = this.get(x, y);
+             if (y >= this.grid.length || cell.isBomb()) {
+                 return null;
+             }
+             cell.val += 1;
+         }
+
+         this.bombIndices.forEach(v => {
+             this.adjacents(...v).forEach(v => increment(...v));
+         });
+     }
+
+     initialize() {
+         this.clicked = false;
+         this.numShown = 0;
+         
+         this.shown = [];
+         this.grid = [];
+         for (let i=0; i<this.size; ++i) {
+             const row = [];
+             for (let j=0; j<this.size; ++j) {
+                 row.push(new Cell(0));
+             }
+             this.grid.push(row);
+         }
+         
+         const bombBag = this.getRandomIndices();
+         this.bombIndices = [];
+         for (let i=0; i<this.bombs; ++i) {
+             const v = bombBag[i];
+             this.bombIndices.push(v);
+             this.grid[v[0]][v[1]] = new Bomb();
+         }
+
+     }
+
+     intersects(x, y) {
+         this.grid.forEach((a, i) => {
+             a.forEach((b, j) => {
+                 const { bx, by, bw, bh } = this.getBoundingRect(a, b);
+
+                 // collision detection here
+             });
+         });
+     }
+
+     getBoxSize() {
+         return (canvas.width-(this.padding*2))/this.grid.length;
+     }
+
+     forEach(f) {
+         this.grid.forEach((a, i) => {
+             a.forEach((item, j) => {
+                 f(item, i, j);
+             });
+         });
+     }
+
+     getBoundingRect(x, y) {
+         const boxSize = this.getBoxSize(),
+               offsetX = this.padding,
+               offsetY = this.padding - this.marginBottom;
+         
+         return {
+             x: offsetX + boxSize * x,
+             y: offsetY + boxSize * y,
+             w: boxSize,
+             h: boxSize,
+         };
+     }
+
+     draw() {
+         ctx.clearRect(0, 0, canvas.width, canvas.height);
+         
+         let y = 0;
+         this.grid.forEach((a, i) => {
+             let x = 0;
+
+             a.forEach((item, j) => {
+                 const { x, y, w, h } = this.getBoundingRect(i, j);
+
+                 if (this.lost && item.isBomb()) {
+                     ctx.fillStyle = 'red';
+                 } else {
+                     ctx.fillStyle = item.shown ? 'gray' : 'lightgray';
+                 }
+
+                 ctx.fillRect(x, y, w, h);
+
+                 if (item.val !== 0 || item.flagged) {
+                     ctx.fillStyle = item.shown ? 'white' : 'black';
+                     
+                     let fontSize = this.getBoxSize()/2;
+                     if (item.flagged && !item.shown) {
+                         ctx.fillStyle = 'darkred';
+                         fontSize = fontSize*1.5;
+                     }
+
+                     ctx.font = fontSize + 'px Arial';
+                     ctx.fillText(item.getLabel(), x - fontSize/3 + w/2, y + fontSize/3 + h/2);
+
+                 }
+
+                 ctx.strokeStyle = item.shown ? 'darkgray' : 'darkgray';
+                 ctx.strokeRect(x, y, w, h);
+             });
+         });
+     }
+
+     resetNonBombs() {
+         this.forEach(function (e, x, y) {
+             if (!e.isBomb()) {
+                 e.val = 0;
+             }
+         });
+     }
+
+     get(x, y) {
+         if (x >= this.grid.length || x < 0 || y >= this.grid.length || y < 0 ){
+             return null;
+         }
+         return this.grid[x][y];
+     }
+
+     adjacents(x, y) {
+         const adjacents = [];
+         const push = (x, y) => {
+             const e = this.get(x, y);
+             if (e !== null) {
+                 adjacents.push([x, y]);
+             }
+         }
+         
+         push(x+1, y);
+         push(x-1, y);
+         push(x, y+1);
+         push(x, y-1);
+         
+         push(x-1, y+1);
+         push(x+1, y+1);
+         push(x+1, y-1);
+         push(x-1, y-1);
+
+         return adjacents;
+     }
+
+     
+     swapBombsSurrounding(x, y) {
+         let cell = this.get(x, y);
+         const adjacents = this.adjacents(x, y).concat([[x, y]]);
+         if (cell.isBomb()) {
+             cell = this.swapBomb(x, y, adjacents);
+         }
+         
+         adjacents.forEach(v => {
+             this.swapBomb(v[0], v[1], adjacents)
+         });
+         return cell;
+     }
+
+     swapBomb(x, y, nots=[]) {
+         const bomb = this.get(x, y);
+         if (!bomb.isBomb()) {
+             return null;
+         }
+         for (const v of this.getRandomIndices()) {
+             let has = false;
+             for (const e of nots) {
+                 if (v[0] === e[0] && v[1] === e[1]) {
+                     has = true;
+                     break;
+                 }
+             }
+             
+             const cell = this.get(v[0], v[1]);
+
+             if (!cell.isBomb() && !has) {
+                 this.grid[v[0]][v[1]] = bomb;
+                 this.grid[x][y] = cell;
+
+                 this.bombIndices.forEach((e, i) => { // slow
+                     if (e[0] === x && e[1] === y) {
+                         this.bombIndices[i] = v;
+                     }
+                 });
+
+                 return cell;
+             }
+         }
+         return bomb;
+     }
+
+     attachHandlers() {
+         canvas.oncontextmenu = function (e) {
+             e.preventDefault();
+         };
+         
+         canvas.onmousedown = e => {
+             if (!this.lost && !this.won) {
+                 let minDistance = Infinity,
+                     min = null,
+                     minCoords = null;
+
+                 const r = canvas.getBoundingClientRect(),
+                       x = e.clientX - r.x,
+                       y = e.clientY - r.y;
+
+                 this.grid.forEach((a, i) => {
+                     a.forEach((b, j) => {
+                         const v = this.getBoundingRect(i, j);
+                         const boxSize = this.getBoxSize()/2;
+                         const d = distance(x, y, v.x + boxSize , v.y + boxSize);
+                         minDistance = Math.min(minDistance, d);
+                         if (minDistance === d) {
+                             min = b;
+                             minCoords = [i, j];
+                         }
+                     });
+                 });
+
+                 if (!this.clicked) {
+                     min = this.swapBombsSurrounding(...minCoords);
+                     this.incrementBombCells();
+                 }
+
+                 if (e.which === 1) { // left click
+                     if (min.flagged) {
+                         return;
+                     }
+
+                     this.lost = min.isBomb();
+                     if (this.lost) {
+                         this.bombIndices.forEach(v => this.get(...v).show());
+                         this.draw();
+                         return;
+                     }
+
+                     const tryShow = (x, y) => {
+                         if (x >= this.grid.length || x < 0 || y >= this.grid.length || y < 0 || this.grid[x][y].flagged){
+                             return false;
+                         }
+                         const cell = this.grid[x][y];
+                         
+                         if (this.grid[x][y].val !== 0 || this.grid[x][y].shown) {
+                             if (!cell.shown) {
+                                 this.numShown += 1;
+                                 cell.show();
+                             }
+                             return false;
+                         }
+
+                         if (!cell.shown) {
+                             this.numShown += 1;
+                             cell.show();
+                         }
+                         return true;
+                     }
+
+                     function showAdjacents(x, y) {
+                         if (tryShow(x+1, y)) showAdjacents(x+1, y);
+                         if (tryShow(x-1, y)) showAdjacents(x-1, y);
+                         if (tryShow(x, y+1)) showAdjacents(x, y+1);
+                         if (tryShow(x, y-1)) showAdjacents(x, y-1);
+                         
+                         if (tryShow(x-1, y+1)) showAdjacents(x-1, y+1);
+                         if (tryShow(x+1, y+1)) showAdjacents(x+1, y+1);
+                         if (tryShow(x+1, y-1)) showAdjacents(x+1, y-1);
+                         if (tryShow(x-1, y-1)) showAdjacents(x-1, y-1);                                          
+                     }
+
+                     if (min.val === 0) {
+                         showAdjacents(minCoords[0], minCoords[1]);
+                     }
+
+                     if (!min.shown) {
+                         this.numShown += 1;
+                         min.show();
+                     }
+                 } else { // right click
+                     min.toggleFlag();
+                 }
+
+                 this.won = this.numShown === (this.size*this.size)-this.bombs;
+                 if (this.won)
+                     this.bombIndices.forEach(v => this.get(...v).flagged = true);
+
+                 this.clicked = true;
+                 this.draw();
+             }
+         };
+         
+         window.onkeydown = e => {
+             switch (e.key) {
+                 case 'ArrowUp':
+                     console.log('up');
+                     break;
+                 case 'ArrowDown':
+
+                     break;
+
+                 case 'ArrowLeft':
+
+                     break;
+                 case 'ArrowRight':
+
+                     break;
+                 case 'Enter':
+
+                     break;
+             }
+         };
+     }
+
+     toString() {
+         let str = '';
+         for (const row of this.grid) {
+             str += row.join(' ') + '\n';  
+         }
+         return str;
+     }
+
+     getRandomIndices() {
+         return shuffle(this.getIndices());
+     }
+
+     getIndices() {
+         const xs = [];
+         for (let i=0; i<this.grid.length; ++i) {
+             for (let j=0; j<this.grid.length; ++j) {
+                 xs.push([i, j]);
+             }
+         }
+         return xs;
+     }
+ }
+
+ function shuffle(a) {
+     for (let i=0; i<a.length-2; ++i) {
+         const j = Math.floor(Math.random()*a.length),
+               temp = a[j];
+         a[j] = a[i];
+         a[i] = temp;
+     }
+     return a;
+ }
+
+ function distance(x1, y1, x2, y2) {
+     return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+ }
+
+ const g = new Game();
+</script>
+
+        <script src="../site.js"></script>        
+    </body>
+</html>
