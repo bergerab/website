@@ -282,15 +282,48 @@ if (character.isHit) {
 
             <figure>
                 <canvas id="stage" width="300" height="300"></canvas>
+
+                <div>
+                    <button onclick="window.pressKey()">Click</button>
+                    <input onchange="window.switchAmount = value;" value="450"></input> ms
+                </div>
+                <select onchange="window.loopDelay = eval(value);">
+                    <option value="1/240 * 1000">240FPS</option>                                        
+                    <option value="1/120 * 1000">120FPS</option>                    
+                    <option value="1/60 * 1000" selected="selected">60FPS</option>
+                    <option value="() => 1/(Math.ceil((Math.random()*20)) + 40) * 1000">Random (40-60FPS)</option>
+                    <option value="1/30 * 1000">30FPS</option>
+                    <option value="1/10 * 1000">10FPS</option>
+                    <option value="1000">1FPS</option>
+                </select>
+                <div>
+                    Accuracy: 
+                    <span id="accuracy">0</span>%
+                </div>
+                
+                
                 <script>
                  const canvas = document.getElementById('stage'),
                        ctx = canvas.getContext('2d'),
                        width = canvas.width,
                        height = canvas.height;
 
+                 let keyDownTime = null,
+                     keyDown = false;
+
+                 
+                 window.keyDown = false;
+                 window.switchDelay = 450;
+                 window.loopDelay = 16.6666;
+
+                 window.pressKey = function() {
+                     keyDown = true;
+                     keyDownTime = new Date();
+                 };
+
                  document.addEventListener('keydown', function (e) {
                      if (e.key === ' ') {
-                         keyDown = true;
+                         pressKey();
                      }
                  });
                  document.addEventListener('keyup', function (e) {
@@ -299,25 +332,25 @@ if (character.isHit) {
                      }
                  });
 
-                 let t = new Date(),
-                     keyDownTime = null,
+                 let framePerfectTime = null,
+                     waitingForFramePerfectInput = false,
                      failedCounter = 0,
                      successCounter = 0;
 
-                 var jt = null,
-                     lt = null;
-                 
-                 window.keyDown = false;
-                 window.switchDelay = 450;
-                 window.loopDelay = 16.6666;
+                 let trials = 0,
+                     successes = 0;
+
+                 const accuracyDisplay = document.getElementById('accuracy');
 
                  function loop() {
                      let delay = window.loopDelay;
                      if (typeof delay === 'function') {
                          delay = delay();
                      }
+
                      
                      var now = new Date();
+                     
                      if (failedCounter > 0) {
                          ctx.fillStyle = 'red';
                          ctx.fillRect(0, 0, width, height);
@@ -337,51 +370,35 @@ if (character.isHit) {
                      } else {
                          ctx.fillStyle = 'blue';
                          ctx.fillRect(0, 0, width, height);
-                         if (keyDown && !keyDownTime) {
-                             jt = new Date();
-                             keyDownTime = now;
+                         
+                         if (keyDown) {
+                             framePerfectTime = new Date() + window.switchDelay;
+                             waitingForFramePerfectInput = true;
                              keyDown = false;
                          }
-                         
-                         if (keyDownTime !== null && now - keyDownTime <= window.switchDelay) {
+
+                         if (waitingForFramePerfectInput && now - framePerfectTime < window.switchDelay) {
                              if (keyDown) {
-                                 keyDownTime = null;
                                  failedCounter = 500;
                              } else {
                                  ctx.fillStyle = 'yellow';
                              }
                              ctx.fillRect(0, 0, width, height);
-                         } else if (keyDownTime !== null) {
-                             if (keyDown) {
-                                 successCounter = 500;
-                             }
-                             lt = new Date();
-                             console.log('Frame took:', lt - jt, 'ms');
-                             keyDownTime = null;
+                         } else if (framePerfectTime && now - framePerfectTime > window.switchDelay && keyDown) {
+                             console.log('late', keyDown)
+                         } else if (keyDown) {
+                             successCounter = 500;
+                             ++successes;
                          }
                      }
 
-                     keyDown = false;
                      console.log(delay);
+                     accuracyDisplay.innerHTML = trials === 0 ? 0 : 100 * successes / trials;
                      setTimeout(loop, delay);
                  }
                  setTimeout(loop, window.loopDelay);
                 </script>
-                <figcaption>
-                    <div>
-                        <button onclick="window.keyDown = true;">Click</button>
-                        <input onchange="window.switchAmount = value;" value="450"></input> ms
-                    </div>
-                    <select onchange="window.loopDelay = eval(value);">
-                        <option value="1/240 * 1000">240FPS</option>                                        
-                        <option value="1/120 * 1000">120FPS</option>                    
-                        <option value="1/60 * 1000" selected="selected">60FPS</option>
-                        <option value="() => 1/(Math.ceil((Math.random()*20)) + 40) * 1000">Random (40-60FPS)</option>
-                        <option value="1/30 * 1000">30FPS</option>
-                        <option value="1/10 * 1000">10FPS</option>
-                        <option value="1000">1FPS</option>
-                    </select>
-                </figcaption>
+
             </figure>
         </section>
     </article>

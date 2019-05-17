@@ -1,0 +1,13 @@
+.objin-object-container {
+    padding: 0 0 1em 0;
+}
+
+.objin-label {
+    padding-right: 0.5em;
+    text-transform: capitalize;
+    width: 10px;
+}
+
+.objin-label:after {
+    content: ':';
+}

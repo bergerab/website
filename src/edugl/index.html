@@ -1,0 +1,36 @@
+<script src="math.js"></script>
+<script src="random.js"></script>
+<script src="interp.js"></script>
+<script src="mapper.js"></script>                        
+<script src="geo.js"></script>        
+<script src="vector.js"></script>
+<script src="color.js"></script>        
+<script src="matrix.js"></script>
+<script src="edugl.js"></script>
+<script src="speedTest.js"></script>        
+<script src="test.js"></script>
+
+<div id="stage"></div>
+<input type="file" onchange="showFile()">
+<canvas id="test-canvas" width="600" height="600"></canvas>
+<script>
+ function showFile() {
+     var file = document.querySelector('input[type=file]').files[0];
+     const reader = new FileReader();
+     reader.onload = event => {
+         window.image = event.target.result;
+         ctx.drawPPM(event.target.result);
+     };
+     reader.onerror = error => reject(error);
+     reader.readAsBinaryString(file); // must be read as binary
+ };
+
+ const ctx = new EduGL(document.getElementById('stage'), {
+     height: 150,
+     width: 150,
+     pixelHeight: 5,
+     pixelWidth: 5,
+ });
+
+ const tests = new Tests(ctx);
+</script>

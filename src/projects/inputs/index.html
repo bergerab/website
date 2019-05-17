@@ -1,0 +1,61 @@
+<script src="inputs.js"></script>
+<link rel="stylesheet" href="objin.css"></link>
+
+<div id="thing"></div>
+
+<script>
+ 
+ const objin = new Objin(document.getElementById('thing'), {
+     initial: [
+         {
+             x: 23.432,
+             y: 32.555,
+             color: 'magenta',
+         },
+         {
+             x: 23.011,
+             y: 99.03,
+             color: 'pink',
+         }
+     ],
+     object: {
+         name: 'Vec2',
+         fields: [
+             {
+                 editor: 'textbox',
+                 type: 'number',
+                 step: 0.01,
+                 key: 'x',
+                 value: 0.0,
+                 // add max and min and placeholder
+             },
+             {
+                 editor: 'textbox',
+                 type: 'number',
+                 step: 0.01,
+                 key: 'y',
+                 value: 0.0,
+             },
+             {
+                 editor: 'select',
+                 key: 'color',
+                 value: 'red',
+                 options: {
+                     'red': 'red',
+                     'blue': 'blue',
+                     'green': 'green',
+                     'purple': 'purple',
+                     'pink': 'pink',
+                     'cyan': 'cyan',
+                     'magenta': 'magenta',
+                     'black': 'black',
+                     'gray': 'gray',
+                     'brown': 'brown',
+                     'orange': 'orange'
+                 }
+             }
+         ]
+     }
+ });
+
+</script>

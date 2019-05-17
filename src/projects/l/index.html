@@ -1,0 +1,84 @@
+<script src="l.js"></script>
+
+<script>
+ const _l_ = '<i style="font-family: cursive;">l</i>';
+ 
+ const e1 = l.div([
+     l.h1(_l_),
+     l.p(`If you give ${_l_} a string, it will use it as the innerHTML of the DOM node it produces.`),
+     l.pre([
+         l.code(`l.h1('Title');`),
+     ]),
+     l.p(`You can also give ${_l_} a second parameter for other properties and attributes.`),
+     l.pre([
+         l.code(`l.h1('Title', {
+             props: {
+                 style: {
+                     color: 'red',
+                 }
+             }
+         });`),
+     ]),
+     l.h2('Try it out'),
+     l.div([
+
+         l.textarea({
+             attrs: {
+                 cols: '40',
+                 rows: '30',
+                 id: 'try',
+             },
+             props: {
+                 onkeyup: function (e) {
+                     const output = document.getElementById('try-output'),
+                           code = e.target.value;
+
+                     try {
+                         eval(`
+const output = document.getElementById('try-output');
+const root = ${code};
+output.innerHTML = '';
+output.appendChild(root);`);
+                         e.target.style.borderColor = e.target.style.outlineColor = null;
+                     } catch {
+                         e.target.style.borderColor = e.target.style.outlineColor = 'red';
+                     }
+                 },
+                 
+                 style: {
+                     fontFamily: 'Monico, monospace',
+                     fontSize: '12px',
+                     display: 'block',
+                     width: '50%',
+                 },
+                 value: `l.div([
+    l.h1('Example'),
+    l.p("It's easy."),
+]);`,
+             }
+         }),
+
+         l.div({
+             attrs: {
+                 id: 'try-output',
+             },
+             props: {
+                 style: {
+                     margin: '0 0 0 20px',
+                     padding: '10px',
+                     border: 'solid 1px gray',
+                     width: '50%',
+                 }
+             }
+         }),
+     ], {
+         props: {
+             style: {
+                 display: 'flex',
+             }
+         }
+     })
+ ]);
+
+ document.body.appendChild(e1);
+</script>

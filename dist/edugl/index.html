@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Idiocode</title>
+        <meta name="description" content="Code, games, and sometimes art.">
+        <meta name="author" content="Adam Bertrand Berger">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../style.css">
+        <link rel="manifest"  href="../manifest.json"
+    </head>
+    <body>
+        <header>
+            <h1>Idiocode</h1>
+        </header>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../games/index.html">Games</a>
+            <a href="../blog/index.html">Blog</a>
+            <a href="../projects/index.html">Projects</a>
+            <a href="../drawings/index.html">Drawings</a>
+        </nav>
+        <script src="math.js"></script>
+<script src="random.js"></script>
+<script src="interp.js"></script>
+<script src="mapper.js"></script>                        
+<script src="geo.js"></script>        
+<script src="vector.js"></script>
+<script src="color.js"></script>        
+<script src="matrix.js"></script>
+<script src="edugl.js"></script>
+<script src="speedTest.js"></script>        
+<script src="test.js"></script>
+
+<div id="stage"></div>
+<input type="file" onchange="showFile()">
+<canvas id="test-canvas" width="600" height="600"></canvas>
+<script>
+ function showFile() {
+     var file = document.querySelector('input[type=file]').files[0];
+     const reader = new FileReader();
+     reader.onload = event => {
+         window.image = event.target.result;
+         ctx.drawPPM(event.target.result);
+     };
+     reader.onerror = error => reject(error);
+     reader.readAsBinaryString(file); // must be read as binary
+ };
+
+ const ctx = new EduGL(document.getElementById('stage'), {
+     height: 150,
+     width: 150,
+     pixelHeight: 5,
+     pixelWidth: 5,
+ });
+
+ const tests = new Tests(ctx);
+</script>
+
+        <script src="../site.js"></script>        
+    </body>
+</html>
