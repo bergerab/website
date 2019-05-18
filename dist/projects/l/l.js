@@ -20,6 +20,14 @@ class L {
             } else {
                 init.children = init1;
             }
+        } else if (init1 instanceof Element || init1 instanceof HTMLDocument) {
+            if (init2 === undefined) {
+                init = {
+                    children: [init1]
+                };
+            } else {
+                init.children = [init1];
+            }
         }
 
         this.state = init.state || {};
