@@ -29,7 +29,7 @@
      l.h1(_l_),
      l.p(``),
      l.p(`${_l_} is a 100 line Javascript file that makes generating HTML easier.`),
-     l.p(`When you want to create dynamic HTML (interactive HTML that is more than just static) you have to use the DOM API.
+     l.p(`When you want to create HTML dynamically you have to use the DOM API.
 The DOM API is verbose, and can require multiple statements to generate a single node to your liking. This library
 gives a functional style to DOM creation and allows for describing HTML structures in a single statement.
      `),
@@ -301,11 +301,11 @@ output.appendChild(root);`);
      ]),
      l.section([
          l.header(l.h1('Related Libraries')),
-         l.p(`The idea of generating HTML in programming languages via a library is old.
-          It has been (almost famously) re-invented in Common Lisp many times.
-          <a href="https://github.com/ruricolist/spinneret">Here</a> is <code>spinneret</code> which is library for generating HTML5.
+         l.p(`The idea of generating HTML in programming languages is old.
+          It has been (almost famously) re-invented in lisps many times.
+          <a href="https://github.com/ruricolist/spinneret">spinneret</a>, for example, is a library for generating HTML5.
 
-          Programming languages like the lisps, python, and c have done it too. However, these programming languages don't run directly
+          Programming languages like prolog, python, and c have done it too. However, these programming languages don't run directly
           in the browser like Javascript does. Those libraries are created for web servers
           or static page generation. Having access to the DOM allows nodes to be created dynamically and for creating interactive HTML.
           This makes Javascript a good use case for such a library.

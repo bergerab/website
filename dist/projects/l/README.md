@@ -1,7 +1,7 @@
 # _l_
 _l_ is a 100 line Javascript file that makes generating HTML easier.
 
-When you want to create dynamic HTML (interactive HTML that is more than just static) you have to use the DOM API. The DOM API is verbose, and can require multiple statements to generate a single node to your liking. This library gives a functional style to DOM creation and allows for describing HTML structures in a single statement.
+When you want to create HTML dynamically you have to use the DOM API. The DOM API is verbose, and can require multiple statements to generate a single node to your liking. This library gives a functional style to DOM creation and allows for describing HTML structures in a single statement.
 
 ## Motivation
 You can use _l_ to make DOM nodes for you, so you don't have to use the DOM API directly. This saves the programmer's time sheerly because you don't have to use the DOM's verbose wording and imperative style.
@@ -66,9 +66,39 @@ l.div('Red text', { props: style: { color: 'red' }});
 ```
 
 ## Related Libraries
-The idea of generating HTML in programming languages via a library is old. It has been (almost famously) re-invented in Common Lisp many times. Here is spinneret which is library for generating HTML5. Programming languages like the lisps, python, and c have done it too. However, these programming languages don't run directly in the browser like Javascript does. Those libraries are created for web servers or static page generation. Having access to the DOM allows nodes to be created dynamically and for creating interactive HTML. This makes Javascript a good use case for such a library.
+The idea of generating HTML in programming languages is old. It has been (almost famously) re-invented in lisps many times. [spinneret](https://github.com/ruricolist/spinneret), for example, is a library for generating HTML5. Programming languages like prolog, python, and c have done it too. However, these programming languages don't run directly in the browser like Javascript does. Those libraries are created for web servers or static page generation. Having access to the DOM allows nodes to be created dynamically and for creating interactive HTML. This makes Javascript a good use case for such a library.
 
 The browser already has the capability of generating HTML through a builtin interface: the DOM. The DOM has been used enough to see how time consuming it is to use, and others have made libraries to make using it faster for the programmer. This is exactly what _l_ is for, and exactly what the libraries seen below (which came before this) are for:
 - [crel](https://github.com/KoryNunn/crel) - Similar in function to _l_ with interface differences.
 - [laconic](https://github.com/joestelmach/laconic) - Similar to crel (crel says this was its inspiration).
 - [RE:DOM](https://redom.js.org/) - Influenced by web components.
+
+## Unlicense
+
+```
+Unlicense
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to http://unlicense.org
+```
