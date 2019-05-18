@@ -34,46 +34,52 @@ The DOM API is verbose, and can require multiple statements to generate a single
 gives a functional style to DOM creation and allows for describing HTML structures cleanly all in one
 single statement.
      `),
-     l.h4(_l_ + ':'),
-     l.pre([
-         l.code("l.div({" +
-                "\n    attrs: { id: 'contact-us-section' }," +                
-                "\n    props: {" +
-                "\n        style: {" +
-                "\n            color: 'blue'," +
-                "\n            onclick: function () { alert('Insert nag here!'); }," +                
-                "\n        }"+
-                "\n    }," +
-                "\n    children: [" +
-                "\n        l.h1('Contact Us')," +                
-                "\n        l.div('Call us at 555-555-5555')," +
-                "\n        l.div('Visit our website at idiocode.com')," +
-                "\n    ]" +
-                "\n});"
-         ),
-     ]),
-     l.h4('HTML:'),
-     l.textarea({
-         props: {
-             style: {
-                 outline: 'none',
-                 border: 'none',
-                 fontFamily: 'monospace',
-                 fontSize: '13px',
-                 width: '100%',
-                 height: '110px',
-                 resize: 'none',
-             },
-             value: `<div id="contact-us-section" style="color: blue;">
+     l.div([
+         l.div([
+             l.h4(_l_ + ':'),
+             l.pre([
+                 l.code("l.div({" +
+                        "\n    attrs: { id: 'contact-us-section' }," +                
+                        "\n    props: {" +
+                        "\n        style: {" +
+                        "\n            color: 'blue'," +
+                        "\n            onclick: function () { \n                alert('Insert nag here!');\n            }," +                
+                        "\n        }"+
+                        "\n    }," +
+                        "\n    children: [" +
+                        "\n        l.h1('Contact Us')," +                
+                        "\n        l.div('Call us at 555-555-5555')," +
+                        "\n        l.div('Visit our website at idiocode.com')," +
+                        "\n    ]" +
+                        "\n});"
+                 ),
+             ]),
+         ]),
+         l.div([
+             l.h4('HTML:'),
+             l.textarea({
+                 props: {
+                     style: {
+                         outline: 'none',
+                         border: 'none',
+                         fontFamily: 'monospace',
+                         fontSize: '13px',
+                         width: '400px',
+                         height: '110px',
+                         resize: 'none',
+                     },
+                     value: `<div id="contact-us-section" style="color: blue;">
     <h1>Contact Us</h1>
     <div>Call us at 555-555-5555</div>
     <div>Visit our website at idiocode.com</div>
 </div>`,
-         },
-         attrs: {
-             readonly: true,
-         },
-     })
+                 },
+                 attrs: {
+                     readonly: true,
+                 },
+             }),
+         ]),
+     ], { attrs: { style: 'display: flex;' }}),
  ]);
 
  let exampleCount = 0;
