@@ -3,14 +3,13 @@
 <script>
  const _l_ = '<i>l</i>';
  
- const e1 = l.div([
+ const e1 = l.main(l.article([
      l.h1(_l_),
      l.p(``),
      l.p(`${_l_} is a 100 line Javascript file that makes generating HTML easier.`),
-     l.p(`When you want to create dynamic HTML (HTML that has not been pre-made) you have to use the DOM API.
+     l.p(`When you want to create dynamic HTML (interactive HTML that is more than just static) you have to use the DOM API.
 The DOM API is verbose, and can require multiple statements to generate a single node to your liking. This library
-gives a functional style to DOM creation and allows for describing HTML structures cleanly all in one
-single statement.
+gives a functional style to DOM creation and allows for describing HTML structures in a single statement.
      `),
      l.div([
          l.div([
@@ -58,10 +57,10 @@ single statement.
              }),
          ]),
      ], { attrs: { style: 'display: flex;' }}),
- ]);
+ ]));
 
  let exampleCount = 0;
- const makeExample = (example, flip) => {
+ const makeExample = (example, flip, flex=false, parent=e1) => {
      const exampleId = ++exampleCount;
      example = example.toString();
      lines = example.split('\n');
@@ -69,20 +68,19 @@ single statement.
      for (let i=0; i<lines.length; ++i) {
          if (i !== 0 && i !== lines.length - 1) {
              let line = lines[i];
-             if (lines[0] === ' ' && lines[1] === ' ' && lines[2] === ' ' && lines[3] === ' ') {
-                 line = line.substring(4, lines[i].length);
-             }
-             
+             line = line.substring(5, lines[i].length);
              example += line + '\n';
          }
      }
 
-     const textarea =          l.textarea({
+     const textarea = l.textarea({
          attrs: {
-             cols: '40',
+             cols: '30',
              rows: '30',
              class: 'try',
+             wrap: 'off',
              id: 'try' + exampleId,
+             onkeydown: "if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}",
          },
          props: {
              onkeyup: function (e) {
@@ -105,22 +103,23 @@ output.appendChild(root);`);
                  fontFamily: 'Monico, monospace',
                  fontSize: '14px',
                  display: 'block',
-                 width: '50%',
+                 width: '100%',
              },
              value: example,
          }
      });
 
+     const style = flex ? {
+         margin: '0 0 0 20px',
+         padding: '10px',
+         width: '100%',
+     } : {};
      const preview = l.div({
          attrs: {
              id: 'try-output' + exampleId,
          },
          props: {
-             style: {
-                 margin: '0 0 0 20px',
-                 padding: '10px',
-                 width: '50%',
-             }
+             style: style,
          }
      });
 
@@ -128,11 +127,11 @@ output.appendChild(root);`);
      if (flip) {
          nodes = [preview, textarea];
      }
-     
-     e1.appendChild(l.div(nodes, {
+
+     l.append(parent, l.div(nodes, {
          props: {
              style: {
-                 display: 'flex',
+                 display: flex ? 'flex' : 'initial',
                  margin: '0 0 20px 0',
              }
          }
@@ -140,51 +139,70 @@ output.appendChild(root);`);
  };
 
  makeExample(function () {
-     l.div([
-         l.h1('Motivation'),
-         l.p('You can use _l_ to make DOM nodes for you, so you don\'t have to use the DOM API directly. This saves the programmers time sheerly because you don\'t have to use the DOM\'s verbose wording and imperative style.'),
-         l.p('The DOM API\'s imperative style requires you to create more lines to make nodes. Because statements typically are not combined on a single line, it forces the programmer to write more lines of code in their programs.'),
-         l.p('_l_ allows you to create a node, and assign attributes to it in one line. You can also assign child nodes without assigning any additional variables (unlike the <code>document.createElement(...)</code> API).'),
+     l.section([
+         l.header(l.h1('Motivation')),
+         l.p(`You can use _l_ to make DOM nodes for you, so you
+              don\'t have to use the DOM API directly. This saves
+              the programmer's time sheerly because you don\'t have
+              to use the DOM\'s verbose wording and imperative style.
+         `),
+         l.p(`The DOM API\'s imperative style requires you to create
+              more lines to make nodes. Because one statement usually appears 
+              per line, it forces the programmer
+              to write more lines of code.
+         `),
+         l.p(`_l_ allows you to create a node and assign attributes to it
+              in one line. You can also assign child nodes without assigning
+              any additional temporary variables
+              (unlike the <code>document.createElement(...)</code> API).
+         `),
          l.h4('Bad:'),
          l.pre([
-             l.code(`const node = document.createElement('span');
-node.innerHTML = 'Meatball';
-const container = document.createElement('div');
-container.appendChild(node);`)
+             l.code("const node = document.createElement('span');\n" +
+                    "node.innerHTML = 'Meatball';\n" +
+                    "const container = document.createElement('div');\n" +
+                    "container.appendChild(node);")
          ]),
          l.h4('Good:'),
          l.pre([
              l.code(`const container = l.div([l.span('Meatball')]);`),
          ]),
      ]);
- });
+ }, true);
 
  makeExample(function () {
-     l.div([
-         l.h1('Interface'),
-         l.p(`The library is meant to mimic the way DOM nodes are designed with attributes, properties, and children.
- _l_ takes a "configuration object" which
-is an object that contains either (you guessed it) attributes, properties, or children.
+     l.section([
+         l.header(l.h1('Interface')),
+         l.p(`The library is meant to mimic the way DOM nodes are
+              designed by use of attributes, properties, and children.
+              _l_ function calls take a "configuration object" which
+              is an object that contains either (you guessed it)
+              attributes, properties, or children.
 
-If you specify "attrs" or "attributes" everything in the object that key points to
-will be added as an attribute to the HTML element.
+              If you specify "attrs" or "attributes" each field in
+              that object will be added as an attribute to the HTML element.
          `),
          l.pre([
              l.code(`l.div({ attrs: { id: 'my-id', class: 'cool' } });`),
          ]),
-         l.p(`
-You can also specify a "props" or "properties" key. Every field in that object will be assigned to the
-  DOM node after creation. You can use this to attach event handlers to DOM nodes. You could also attach event handlers
-    via an attribute, but those have different meanings. You could also use this to apply styles to the DOM node. Supplying the
-    properties object with a style object could achieve the same as this imperative code: <code>node.style.backgroundColor = 'red';</code>.
+         l.p(`You can also specify a "props" or "properties" key. Each
+              field in that object will be assigned to the
+              DOM node after creation. You can use this to attach event
+              handlers to DOM nodes. You could also attach event handlers
+              via an attribute, but those have different meanings. Additionally,
+              you could use this to apply styles to the DOM node. Supplying
+              the properties object with a style could achieve the
+              same as this imperative code:
+              <code>node.style.backgroundColor = 'red';</code>.
          `),
          l.pre([
              l.code(`l.div({ props: { style: { backgroundColor: 'red' }}});`),
          ]),
-         l.p(`
-There is one more special value that can be placed in the configuration object: children. In the DOM API you can
-only add children through function calls. There is no way to create an element that already has children on it.
-
+         l.p(`There is one more special value that can be placed in the
+              configuration object: children. In the DOM API you can
+              only add children through function calls. There is no way
+              to create an element that already has children on it. _l_
+              solves that problem:
          `),
          l.pre([
              l.code(`l.div({ children: [ l.b('1'), l.b('2'), l.b('3') ]});`),
@@ -192,43 +210,65 @@ only add children through function calls. There is no way to create an element t
      ]);
  }, true);
 
- makeExample(function () {
-     l.div([
-         l.h1('Syntax'),
-         l.p(`
-Nodes are created by writing <code>l.tagname(...)</code> where "tagname" is a valid name of an HTML element like "div" or "b".
+ function e2 () {
+     l.section([
+         l.header(l.h1('Syntax')),
+         l.p(`Nodes are created by writing <code>l.tagname(...)</code>
+              where "tagname" is a valid name of an HTML element like
+              "div" or "b". HTML5 elements are supported as well. For example:
+              <code>l.section(l.h1('Title'));</code>.
          `),
-         l.p(`
-For creating non-standard HTML elements, you can call _l_ as a function: <code>l('myweirdtagname', ...)</code>
+         l.p(`You can call _l_ as a function too (
+              <code>l('myweirdtagname', ...)</code>) to create
+              non-standard HTML elements.
          `),
-         l.p(`
-There are a few shortcuts which allow for skipping the passing of a configuration object to _l_.
-You can pass in a string instead of a configuration object, and that string will be used as the <code>innerHTML</code>
-of the node.
+         l.p(`There are a few shortcuts which create a shorthand for
+              the configuration object. You can pass in a string
+              instead of a configuration object, and that string will be
+              used as the <code>innerHTML</code> of the node.
          `),
          l.pre([
              l.code(`l.div('This is in the innerHTML');`),
          ]),
-         l.p(`
-You can give it an array instead too which will interpret each item in the array as a child of this node.
-Giving a single node to _l_ will treat that node as its only child.
+         l.p(`You can give it an array instead too which will interpret each
+              item in the array as a child of this node. Giving a single node
+              to _l_ will treat that node as its only child.
          `),
          l.pre([
              l.code(`l.div([ l.div(l.div('Only child')), l.div('Child 2') ]);`),
          ]),
-         l.p(`
-Each of these examples also allows for passing of a configuration object as well. You just pass it in as the last argument:
+         l.p(`Each of these examples allows for passing of a configuration
+              object as well. You just pass it in as the last argument:
          `),
          l.pre([
              l.code(`l.div('Red text', { props: style: { color: 'red' }});`),
          ]),
      ])
- });
+ } 
+ makeExample(e2, true);
 
- document.body.appendChild(e1);
 
- document.body.appendChild(l.div([
-     l.h1('Download'),
+ 
+ l.appendBody(e1);
+
+
+ const tryItOut = l.section([
+     l.header(l.h1('Try it out!')),
+ ]);
+
+ makeExample(function () {
+     l.div([
+         l.p(`Write Javascript with _l_
+              in the textarea on
+              the left column and see
+              the output on the right column.
+         `),
+     ]);
+ }, false, true, tryItOut);
+ l.append(e1, tryItOut); 
+
+ l.append(e1, l.section([
+     l.header(l.h1('Download')),
      l.p([
          l.a('Click here to download.', {
              attrs: {
@@ -237,29 +277,30 @@ Each of these examples also allows for passing of a configuration object as well
              }
          }),
      ]),
-     l.h1('Related Libraries'),
-     l.p(`
-The concept of generating HTML with libraries in programming languages is old.
- It has been (almost famously) re-invented in Common Lisp many times.
-<a href="https://github.com/ruricolist/spinneret">Here</a> is <code>spinneret</code> which generates HTML5 Common Lisp.
+     l.section([
+         l.header(l.h1('Related Libraries')),
+         l.p(`The idea of generating HTML in programming languages via a library is old.
+          It has been (almost famously) re-invented in Common Lisp many times.
+          <a href="https://github.com/ruricolist/spinneret">Here</a> is <code>spinneret</code> which is library for generating HTML5.
 
-Programming languages like lisps, python, and c have done it too. However, these proogramming languages don't run directly
-in the browser like Javascript does. Those libraries are created for web servers
-or static page generation. Having access to the DOM allows nodes to be created dynamically, which makes Javascript
-a good use case for such a library.
-     `),
-     l.p(`
-         The browser has the capability of generating HTML through an interface that works: the DOM. Others have used the DOM enough
-         to see how verbose and time consuming it is to use, and made libraries to make using it easier. This is exactly what ${_l_}
-         is for, and exactly what the libraries seen below which came before this are for:
-     `),
-     l.ul([
-         l.li(`<a href="https://github.com/KoryNunn/crel" target="_blank">crel</a> - Nearly identical in function to ${_l_} with some interface differences`),
-         l.li('<a href="https://github.com/joestelmach/laconic" target="_blank">laconic</a> - Similar to crel (crel says this was its inspiration).'),
-         l.li('<a href="https://redom.js.org/" target="_blank">RE:DOM</a> - Appears to be influenced from components (from React).'),         
+          Programming languages like the lisps, python, and c have done it too. However, these programming languages don't run directly
+          in the browser like Javascript does. Those libraries are created for web servers
+          or static page generation. Having access to the DOM allows nodes to be created dynamically and for creating interactive HTML.
+          This makes Javascript a good use case for such a library.
+         `),
+         l.p(`The browser already has the capability of generating HTML through a builtin interface: the DOM. The DOM has been used enough
+         to see how time consuming it is to use, and others have made libraries to make using it faster for the programmer. This is exactly what ${_l_}
+         is for, and exactly what the libraries seen below (which came before this) are for:
+         `),
+         l.ul([
+             l.li(`<a href="https://github.com/KoryNunn/crel" target="_blank">crel</a> - Similar in function to ${_l_} with interface differences.`),
+             l.li('<a href="https://github.com/joestelmach/laconic" target="_blank">laconic</a> - Similar to crel (crel says this was its inspiration).'),
+             l.li('<a href="https://redom.js.org/" target="_blank">RE:DOM</a> - Influenced by web components.'),         
+         ]),
      ]),
-     l.h1('Unlicense'),
-     l.pre(`This is free and unencumbered software released into the public domain.
+     l.section([
+         l.header(l.h1('Unlicense')),
+         l.pre(`This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or
 distribute this software, either in source code form or as a compiled
@@ -283,6 +324,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to http://unlicense.org`),
+     ]),
  ]));
 
  // add some features for appending nodes/inserting nodes
