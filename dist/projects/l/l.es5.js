@@ -10,103 +10,103 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var L =
-/*#__PURE__*/
-function () {
-  function L(name) {
-    var init1 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    var init2 = arguments.length > 2 ? arguments[2] : undefined;
+var l = function () {
+  var L =
+  /*#__PURE__*/
+  function () {
+    function L(name) {
+      var init1 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var init2 = arguments.length > 2 ? arguments[2] : undefined;
 
-    _classCallCheck(this, L);
+      _classCallCheck(this, L);
 
-    var init = init2 || init1;
+      var init = init2 || init1;
 
-    if (typeof init1 === 'string') {
-      if (init2 === undefined) {
-        init = {
-          props: {
-            innerHTML: init
-          }
-        };
-      } else {
-        init.props = init.props || {};
-        init.props.innerHTML = init1;
+      if (typeof init1 === 'string') {
+        if (init2 === undefined) {
+          init = {
+            props: {
+              innerHTML: init
+            }
+          };
+        } else {
+          init.props = init.props || {};
+          init.props.innerHTML = init1;
+        }
+      } else if (Array.isArray(init1)) {
+        if (init2 === undefined) {
+          init = {
+            children: init1
+          };
+        } else {
+          init.children = init1;
+        }
+      } else if (_instanceof(init1, Element) || _instanceof(init1, HTMLDocument)) {
+        if (init2 === undefined) {
+          init = {
+            children: [init1]
+          };
+        } else {
+          init.children = [init1];
+        }
       }
-    } else if (Array.isArray(init1)) {
-      if (init2 === undefined) {
-        init = {
-          children: init1
-        };
-      } else {
-        init.children = init1;
-      }
-    } else if (_instanceof(init1, Element) || _instanceof(init1, HTMLDocument)) {
-      if (init2 === undefined) {
-        init = {
-          children: [init1]
-        };
-      } else {
-        init.children = [init1];
-      }
+
+      this.state = init.state || {};
+      this.name = name;
+      this.children = init.children || [];
+      this.props = init.props || init.properties || {};
+      this.attrs = init.attrs || init.attributes || {};
     }
 
-    this.state = init.state || {};
-    this.name = name;
-    this.children = init.children || [];
-    this.props = init.props || init.properties || {};
-    this.attrs = init.attrs || init.attributes || {};
-  }
+    _createClass(L, [{
+      key: "valOf",
+      value: function valOf(val) {
+        if (typeof val === 'function') {
+          return val.bind(this)();
+        }
 
-  _createClass(L, [{
-    key: "valOf",
-    value: function valOf(val) {
-      if (typeof val === 'function') {
-        return val.bind(this)();
+        return val;
       }
+    }, {
+      key: "render",
+      value: function render() {
+        var tag = document.createElement(this.name);
 
-      return val;
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var tag = document.createElement(this.name);
+        for (var name in this.props) {
+          var val = this.props[name];
 
-      for (var name in this.props) {
-        var val = this.props[name];
-
-        if (_typeof(val) === 'object') {
-          if (_typeof(tag[name]) === 'object') {
-            for (var key in val) {
-              tag[name][key] = val[key];
+          if (_typeof(val) === 'object') {
+            if (_typeof(tag[name]) === 'object') {
+              for (var key in val) {
+                tag[name][key] = val[key];
+              }
+            } else {
+              tag[name] = this.props[name];
             }
           } else {
             tag[name] = this.props[name];
           }
-        } else {
-          tag[name] = this.props[name];
         }
-      }
 
-      for (var _name in this.attrs) {
-        var _val = this.attrs[_name];
+        for (var _name in this.attrs) {
+          var _val = this.attrs[_name];
 
-        if (_val !== null && _val !== '') {
-          tag.setAttribute(_name, this.valOf(this.attrs[_name]));
+          if (_val !== null && _val !== '') {
+            tag.setAttribute(_name, this.valOf(this.attrs[_name]));
+          }
         }
+
+        for (var i = 0; i < this.children.length; ++i) {
+          tag.appendChild(this.children[i]);
+        }
+
+        return tag;
       }
+    }]);
 
-      for (var i = 0; i < this.children.length; ++i) {
-        tag.appendChild(this.children[i]);
-      }
+    return L;
+  }();
 
-      return tag;
-    }
-  }]);
-
-  return L;
-}();
-
-var l = function () {
   var lib = function lib(name, init1, init2) {
     return new L(name, init1, init2).render();
   },
