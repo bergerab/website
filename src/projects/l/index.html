@@ -1,84 +1,291 @@
 <script src="l.js"></script>
 
 <script>
- const _l_ = '<i style="font-family: cursive;">l</i>';
+ const _l_ = '<i>l</i>';
  
  const e1 = l.div([
      l.h1(_l_),
-     l.p(`If you give ${_l_} a string, it will use it as the innerHTML of the DOM node it produces.`),
+     l.p(``),
+     l.p(`${_l_} is a 100 line Javascript file that makes generating HTML easier.`),
+     l.p(`When you want to create dynamic HTML (HTML that has not been pre-made) you have to use the DOM API.
+The DOM API is verbose, and can require multiple statements to generate a single node to your liking. This library
+gives a functional style to DOM creation and allows for describing HTML structures cleanly all in one
+single statement.
+     `),
+     l.h4(_l_ + ':'),
      l.pre([
-         l.code(`l.h1('Title');`),
+         l.code("l.div({" +
+                "\n    attrs: { id: 'contact-us-section' }," +                
+                "\n    props: {" +
+                "\n        style: {" +
+                "\n            color: 'blue'," +
+                "\n            onclick: function () { alert('Insert nag here!'); }," +                
+                "\n        }"+
+                "\n    }," +
+                "\n    children: [" +
+                "\n        l.h1('Contact Us')," +                
+                "\n        l.div('Call us at 555-555-5555')," +
+                "\n        l.div('Visit our website at idiocode.com')," +
+                "\n    ]" +
+                "\n});"
+         ),
      ]),
-     l.p(`You can also give ${_l_} a second parameter for other properties and attributes.`),
-     l.pre([
-         l.code(`l.h1('Title', {
-             props: {
-                 style: {
-                     color: 'red',
-                 }
-             }
-         });`),
-     ]),
-     l.h2('Try it out'),
-     l.div([
-
-         l.textarea({
-             attrs: {
-                 cols: '40',
-                 rows: '30',
-                 id: 'try',
-             },
-             props: {
-                 onkeyup: function (e) {
-                     const output = document.getElementById('try-output'),
-                           code = e.target.value;
-
-                     try {
-                         eval(`
-const output = document.getElementById('try-output');
-const root = ${code};
-output.innerHTML = '';
-output.appendChild(root);`);
-                         e.target.style.borderColor = e.target.style.outlineColor = null;
-                     } catch {
-                         e.target.style.borderColor = e.target.style.outlineColor = 'red';
-                     }
-                 },
-                 
-                 style: {
-                     fontFamily: 'Monico, monospace',
-                     fontSize: '12px',
-                     display: 'block',
-                     width: '50%',
-                 },
-                 value: `l.div([
-    l.h1('Example'),
-    l.p("It's easy."),
-]);`,
-             }
-         }),
-
-         l.div({
-             attrs: {
-                 id: 'try-output',
-             },
-             props: {
-                 style: {
-                     margin: '0 0 0 20px',
-                     padding: '10px',
-                     border: 'solid 1px gray',
-                     width: '50%',
-                 }
-             }
-         }),
-     ], {
+     l.h4('HTML:'),
+     l.textarea({
          props: {
              style: {
-                 display: 'flex',
-             }
-         }
+                 outline: 'none',
+                 border: 'none',
+                 fontFamily: 'monospace',
+                 fontSize: '13px',
+                 width: '100%',
+                 height: '110px',
+                 resize: 'none',
+             },
+             value: `<div id="contact-us-section" style="color: blue;">
+    <h1>Contact Us</h1>
+    <div>Call us at 555-555-5555</div>
+    <div>Visit our website at idiocode.com</div>
+</div>`,
+         },
+         attrs: {
+             readonly: true,
+         },
      })
  ]);
 
+ let exampleCount = 0;
+ const makeExample = (example, flip) => {
+     const exampleId = ++exampleCount;
+     example = example.toString();
+     lines = example.split('\n');
+     example = ''
+     for (let i=0; i<lines.length; ++i) {
+         if (i !== 0 && i !== lines.length - 1) {
+             let line = lines[i];
+             if (lines[0] === ' ' && lines[1] === ' ' && lines[2] === ' ' && lines[3] === ' ') {
+                 line = line.substring(4, lines[i].length);
+             }
+             
+             example += line + '\n';
+         }
+     }
+
+     const textarea =          l.textarea({
+         attrs: {
+             cols: '40',
+             rows: '30',
+             class: 'try',
+             id: 'try' + exampleId,
+         },
+         props: {
+             onkeyup: function (e) {
+                 const output = document.getElementById('try-output'),
+                       code = e.target.value;
+
+                 try {
+                     eval(`
+const output = document.getElementById('try-output${exampleId}');
+const root = ${code.replace(/_l_/g, _l_)};
+output.innerHTML = '';
+output.appendChild(root);`);
+                     e.target.style.borderColor = e.target.style.outlineColor = null;
+                 } catch {
+                     e.target.style.borderColor = e.target.style.outlineColor = 'red';
+                 }
+             },
+             
+             style: {
+                 fontFamily: 'Monico, monospace',
+                 fontSize: '14px',
+                 display: 'block',
+                 width: '50%',
+             },
+             value: example,
+         }
+     });
+
+     const preview = l.div({
+         attrs: {
+             id: 'try-output' + exampleId,
+         },
+         props: {
+             style: {
+                 margin: '0 0 0 20px',
+                 padding: '10px',
+                 width: '50%',
+             }
+         }
+     });
+
+     let nodes = [textarea, preview];
+     if (flip) {
+         nodes = [preview, textarea];
+     }
+     
+     e1.appendChild(l.div(nodes, {
+         props: {
+             style: {
+                 display: 'flex',
+                 margin: '0 0 20px 0',
+             }
+         }
+     }));
+ };
+
+ makeExample(function () {
+     l.div([
+         l.h1('Motivation'),
+         l.p('You can use _l_ to make DOM nodes for you, so you don\'t have to use the DOM API directly. This saves the programmers time sheerly because you don\'t have to use the DOM\'s verbose wording and imperative style.'),
+         l.p('The DOM API\'s imperative style requires you to create more lines to make nodes. Because statements typically are not combined on a single line, it forces the programmer to write more lines of code in their programs.'),
+         l.p('_l_ allows you to create a node, and assign attributes to it in one line. You can also assign child nodes without assigning any additional variables (unlike the <code>document.createElement(...)</code> API).'),
+         l.h4('Bad:'),
+         l.pre([
+             l.code(`const node = document.createElement('span');
+node.innerHTML = 'Meatball';
+const container = document.createElement('div');
+container.appendChild(node);`)
+         ]),
+         l.h4('Good:'),
+         l.pre([
+             l.code(`const container = l.div([l.span('Meatball')]);`),
+         ]),
+     ]);
+ });
+
+ makeExample(function () {
+     l.div([
+         l.h1('Interface'),
+         l.p(`The library is meant to mimic the way DOM nodes are designed with attributes, properties, and children.
+ _l_ takes a "configuration object" which
+is an object that contains either (you guessed it) attributes, properties, or children.
+
+If you specify "attrs" or "attributes" everything in the object that key points to
+will be added as an attribute to the HTML element.
+         `),
+         l.pre([
+             l.code(`l.div({ attrs: { id: 'my-id', class: 'cool' } });`),
+         ]),
+         l.p(`
+You can also specify a "props" or "properties" key. Every field in that object will be assigned to the
+  DOM node after creation. You can use this to attach event handlers to DOM nodes. You could also attach event handlers
+    via an attribute, but those have different meanings. You could also use this to apply styles to the DOM node. Supplying the
+    properties object with a style object could achieve the same as this imperative code: <code>node.style.backgroundColor = 'red';</code>.
+         `),
+         l.pre([
+             l.code(`l.div({ props: { style: { backgroundColor: 'red' }}});`),
+         ]),
+         l.p(`
+There is one more special value that can be placed in the configuration object: children. In the DOM API you can
+only add children through function calls. There is no way to create an element that already has children on it.
+
+         `),
+         l.pre([
+             l.code(`l.div({ children: [ l.b('1'), l.b('2'), l.b('3') ]});`),
+         ]),
+     ]);
+ }, true);
+
+ makeExample(function () {
+     l.div([
+         l.h1('Syntax'),
+         l.p(`
+Nodes are created by writing <code>l.tagname(...)</code> where "tagname" is a valid name of an HTML element like "div" or "b".
+         `),
+         l.p(`
+For creating non-standard HTML elements, you can call _l_ as a function: <code>l('myweirdtagname', ...)</code>
+         `),
+         l.p(`
+There are a few shortcuts which allow for skipping the passing of a configuration object to _l_.
+You can pass in a string instead of a configuration object, and that string will be used as the <code>innerHTML</code>
+of the node.
+         `),
+         l.pre([
+             l.code(`l.div('This is in the innerHTML');`),
+         ]),
+         l.p(`
+You can give it an array instead too which will interpret each item in the array as a child of this node.
+Giving a single node to _l_ will treat that node as its only child.
+         `),
+         l.pre([
+             l.code(`l.div([ l.div(l.div('Only child')), l.div('Child 2') ]);`),
+         ]),
+         l.p(`
+Each of these examples also allows for passing of a configuration object as well. You just pass it in as the last argument:
+         `),
+         l.pre([
+             l.code(`l.div('Red text', { props: style: { color: 'red' }});`),
+         ]),
+     ])
+ });
+
  document.body.appendChild(e1);
+
+ document.body.appendChild(l.div([
+     l.h1('Download'),
+     l.p([
+         l.a('Click here to download.', {
+             attrs: {
+                 href: './l.js',
+                 target: '_blank',
+             }
+         }),
+     ]),
+     l.h1('Related Libraries'),
+     l.p(`
+The concept of generating HTML with libraries in programming languages is old.
+ It has been (almost famously) re-invented in Common Lisp many times.
+<a href="https://github.com/ruricolist/spinneret">Here</a> is <code>spinneret</code> which generates HTML5 Common Lisp.
+
+Programming languages like lisps, python, and c have done it too. However, these proogramming languages don't run directly
+in the browser like Javascript does. Those libraries are created for web servers
+or static page generation. Having access to the DOM allows nodes to be created dynamically, which makes Javascript
+a good use case for such a library.
+     `),
+     l.p(`
+         The browser has the capability of generating HTML through an interface that works: the DOM. Others have used the DOM enough
+         to see how verbose and time consuming it is to use, and made libraries to make using it easier. This is exactly what ${_l_}
+         is for, and exactly what the libraries seen below which came before this are for:
+     `),
+     l.ul([
+         l.li(`<a href="https://github.com/KoryNunn/crel" target="_blank">crel</a> - Nearly identical in function to ${_l_} with some interface differences`),
+         l.li('<a href="https://github.com/joestelmach/laconic" target="_blank">laconic</a> - Similar to crel (crel says this was its inspiration).'),
+         l.li('<a href="https://redom.js.org/" target="_blank">RE:DOM</a> - Appears to be influenced from components (from React).'),         
+     ]),
+     l.h1('Unlicense'),
+     l.pre(`This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to http://unlicense.org`),
+ ]));
+
+ // add some features for appending nodes/inserting nodes
+ 
+ const tries = document.getElementsByClassName('try');
+ for (const t of tries) {
+     t.onkeyup({ target: t });
+ }
+
+ 
+ 
 </script>
