@@ -1,63 +1,73 @@
-<script src="l.min.js"></script>
+<script src="dist/l.js"></script>
 
 <script>
  const _l_ = '<i>l</i>';
  
- const e1 = l.main(l.article([
-     l.h1(_l_),
-     l.p(``),
-     l.p(`${_l_} is a 100 line Javascript file that makes generating HTML easier.`),
-     l.p(`When you want to create HTML dynamically you have to use the DOM API.
+ const e1 = l.article([
+     l.section([
+         l.header([
+             l.img({
+                 attrs: {
+                     src: '../img/l.png',
+                     height: '100px',
+                 }
+             }),
+             l.h1('An HTML Generation Library for Javascript', { props: { style: { margin: '35px 0 0 10px' }}}),
+         ], { props: { style: { display: 'flex' }}}),
+         l.p(``),
+         l.p(`${_l_} is a 100 line Javascript file that makes generating HTML easier.`),
+         l.p(`When you want to create HTML dynamically you have to use the DOM API.
 The DOM API is verbose, and can require multiple statements to generate a single node to your liking. This library
 gives a functional style to DOM creation and allows for describing HTML structures in a single statement.
-     `),
-     l.div([
+         `),
          l.div([
-             l.h4(_l_ + ':'),
-             l.pre([
-                 l.code("l.div({" +
-                        "\n    attrs: { id: 'contact-us-section' }," +                
-                        "\n    props: {" +
-                        "\n        style: {" +
-                        "\n            color: 'blue'," +
-                        "\n            onclick: function () { \n                alert('Insert nag here!');\n            }," +                
-                        "\n        }"+
-                        "\n    }," +
-                        "\n    children: [" +
-                        "\n        l.h1('Contact Us')," +                
-                        "\n        l.div('Call us at 555-555-5555')," +
-                        "\n        l.div('Visit our website at idiocode.com')," +
-                        "\n    ]" +
-                        "\n});"
-                 ),
+             l.div([
+                 l.h4(_l_ + ':'),
+                 l.pre([
+                     l.code("l(() => div({" +
+                            "\n    attrs: { id: 'contact-us-section' }," +                
+                            "\n    props: {" +
+                            "\n        style: {" +
+                            "\n            color: 'blue'," +
+                            "\n            onclick: function () { \n                alert('Insert nag here!');\n            }," +                
+                            "\n        }"+
+                            "\n    }," +
+                            "\n    children: [" +
+                            "\n        h1('Contact Us')," +                
+                            "\n        div('Call us at 555-555-5555')," +
+                            "\n        div('Visit our website at idiocode.com')," +
+                            "\n    ]" +
+                            "\n});"
+                     ),
+                 ]),
              ]),
-         ]),
-         l.div([
-             l.h4('HTML:'),
-             l.textarea({
-                 props: {
-                     style: {
-                         outline: 'none',
-                         border: 'none',
-                         fontFamily: 'monospace',
-                         fontSize: '13px',
-                         width: '400px',
-                         height: '110px',
-                         resize: 'none',
-                     },
-                     value: `<div id="contact-us-section" style="color: blue;">
+             l.div([
+                 l.h4('HTML:'),
+                 l.textarea({
+                     props: {
+                         style: {
+                             outline: 'none',
+                             border: 'none',
+                             fontFamily: 'monospace',
+                             fontSize: '13px',
+                             width: '400px',
+                             height: '110px',
+                             resize: 'none',
+                         },
+                         value: `<div id="contact-us-section" style="color: blue;">
     <h1>Contact Us</h1>
     <div>Call us at 555-555-5555</div>
     <div>Visit our website at idiocode.com</div>
 </div>`,
-                 },
-                 attrs: {
-                     readonly: true,
-                 },
-             }),
-         ]),
-     ], { attrs: { style: 'display: flex;' }}),
- ]));
+                     },
+                     attrs: {
+                         readonly: true,
+                     },
+                 }),
+             ]),
+         ], { attrs: { style: 'display: flex;' }}),
+     ]),
+ ]);
 
  let exampleCount = 0;
  const makeExample = (example, flip, flex=false, parent=e1) => {
@@ -128,7 +138,7 @@ output.appendChild(root);`);
          nodes = [preview, textarea];
      }
 
-     l.append(parent, l.div(nodes, {
+     l.appendChild(parent, l.div(nodes, {
          props: {
              style: {
                  display: flex ? 'flex' : 'initial',
@@ -247,13 +257,10 @@ output.appendChild(root);`);
  } 
  makeExample(e2, true);
 
-
- 
- l.appendBody(e1);
-
+ l.appendBody(l.main(e1));
 
  const tryItOut = l.section([
-     l.header(l.h1('Try it out!')),
+     l.header(l.h1('Try it out!', { attrs: { id: 'try' }})),
  ]);
 
  makeExample(function () {
@@ -265,21 +272,22 @@ output.appendChild(root);`);
          `),
      ]);
  }, false, true, tryItOut);
- l.append(e1, tryItOut); 
+ l.appendChild(e1, tryItOut); 
 
- l.append(e1, l.section([
+ l.appendChild(e1, l.section([
      l.header(l.h1('Download')),
      l.p([
-         l.a('Click here to download.', {
+         l.a('Right click here and save to download.', {
              attrs: {
                  href: './l.min.js',
                  target: '_blank',
              }
          }),
      ]),
-     l.section([
-         l.header(l.h1('Related Libraries')),
-         l.p(`The idea of generating HTML in programming languages is old.
+ ]),
+          l.section([
+              l.header(l.h1('Related Libraries')),
+              l.p(`The idea of generating HTML in programming languages is old.
           It has been (almost famously) re-invented in lisps many times.
           <a href="https://github.com/ruricolist/spinneret">spinneret</a>, for example, is a library for generating HTML5.
 
@@ -287,20 +295,20 @@ output.appendChild(root);`);
           in the browser like Javascript does. Those libraries are created for web servers
           or static page generation. Having access to the DOM allows nodes to be created dynamically and for creating interactive HTML.
           This makes Javascript a good use case for such a library.
-         `),
-         l.p(`The browser already has the capability of generating HTML through a builtin interface: the DOM. The DOM has been used enough
-         to see how time consuming it is to use, and others have made libraries to make using it faster for the programmer. This is exactly what ${_l_}
+              `),
+              l.p(`The browser already has the capability of generating HTML through a builtin interface: the DOM. I've used the DOM enough
+         to know how time consuming it is to use, and others have noticed too and have created libraries to make using it faster for the programmer. This is exactly what ${_l_}
          is for, and exactly what the libraries seen below (which came before this) are for:
-         `),
-         l.ul([
-             l.li(`<a href="https://github.com/KoryNunn/crel" target="_blank">crel</a> - Similar in function to ${_l_} with interface differences.`),
-             l.li('<a href="https://github.com/joestelmach/laconic" target="_blank">laconic</a> - Similar to crel (crel says this was its inspiration).'),
-             l.li('<a href="https://redom.js.org/" target="_blank">RE:DOM</a> - Influenced by web components.'),         
-         ]),
-     ]),
-     l.section([
-         l.header(l.h1('Unlicense')),
-         l.pre(`This is free and unencumbered software released into the public domain.
+              `),
+              l.ul([
+                  l.li(`<a href="https://github.com/KoryNunn/crel" target="_blank">crel</a> - Similar in function to ${_l_} with interface differences.`),
+                  l.li('<a href="https://github.com/joestelmach/laconic" target="_blank">laconic</a> - Similar to crel (crel says this was its inspiration).'),
+                  l.li('<a href="https://redom.js.org/" target="_blank">RE:DOM</a> - Influenced by web components.'),         
+              ]),
+          ]),
+          l.section([
+              l.header(l.h1('Unlicense')),
+              l.pre(`This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or
 distribute this software, either in source code form or as a compiled
@@ -324,8 +332,8 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to http://unlicense.org`),
-     ]),
- ]));
+          ]),
+ );
 
  // add some features for appending nodes/inserting nodes
  

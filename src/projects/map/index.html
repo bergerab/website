@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+        <canvas id="screen" width="800" height="800"></canvas>
+
+        <script>
+         const canvas = document.getElementById('screen'),
+               ctx = canvas.getContext('2d');
+
+         class Vec2 {
+             constructor(x, y) {
+                 this.x = x;
+                 this.y = y;
+             }
+
+             sub(o) {
+                 return new Vec2(this.x-o.x, this.y-o.y);
+             }
+
+             hyp() {
+                 return Math.sqrt(this.x*this.x + this.y*this.y);
+             }
+         }
+
+         const apartments = [
+         ];
+
+         let apartmentCount = 0;
+         function addApartment(x, y, name) {
+             if (name === undefined) {
+                 name = 'Apartment ' + ++apartmentCount;
+             }
+             apartments.push({
+                 name: name,
+                 location: new Vec2(x, y),
+             })
+         }
+         addApartment(100, 30);
+         addApartment(200, 100);
+         addApartment(500, 100);
+         addApartment(500, 300);
+
+         const places = [
+             {
+                 name: 'Anytime Fitness',
+                 location: new Vec2(400, 50),
+                 type: 'fitness',
+             },
+             {
+                 name: 'Shorewood Fitness Center',
+                 location: new Vec2(150, 400),
+                 type: 'fitness',
+             },
+             {
+                 name: 'Wirth Park',
+                 location: new Vec2(50, 50),
+                 type: 'park',
+             },
+             {
+                 name: 'Brown Park',
+                 location: new Vec2(250, 120),
+                 type: 'park',
+             },
+             {
+                 name: 'Whole foods',
+                 location: new Vec2(150, 150),
+                 type: 'grocery',
+             },
+             {
+                 name: 'Metro Market',
+                 location: new Vec2(50, 150),
+                 type: 'grocery',
+             },
+             {
+                 name: 'Pick n Save',
+                 location: new Vec2(300, 50),
+                 type: 'grocery',
+             },
+         ];
+
+         const configs = {
+             grocery: {
+                 bufferSize: 50,
+                 bufferColor: 'lightblue',
+                 bufferColorOutline: 'blue',
+             },
+             park: {
+                 bufferSize: 100,
+                 bufferColor: 'lightgreen',
+                 bufferColorOutline: 'green',
+             },
+             fitness: {
+                 bufferSize: 200,
+                 bufferColor: 'yellow',
+                 bufferColorOutline: 'gold',
+             }
+         };
+
+         function renderBuffer(place) {
+             const loc = place.location;
+             if (configs[place.type]) {
+                 const config = configs[place.type];
+                 
+                 ctx.beginPath();
+                 ctx.fillStyle = config.bufferColorOutline;
+                 ctx.arc(loc.x, loc.y, config.bufferSize, 0, Math.PI*2);
+                 ctx.fill();
+                 ctx.closePath();
+
+                 ctx.beginPath();
+                 ctx.fillStyle = config.bufferColor;
+                 ctx.arc(loc.x, loc.y, config.bufferSize - 1, 0, Math.PI*2);
+                 ctx.fill();
+                 ctx.closePath();
+             }
+         }
+
+         function renderPlace(place, weights) {
+             const loc = place.location,
+                   r = 5,
+                   textSize = 5;
+
+             if (configs[place.type]) {
+                 ctx.fillStyle = configs[place.type].bufferColorOutline;
+             } else {
+                 ctx.fillStyle = 'black';
+             }
+             ctx.beginPath();
+             ctx.arc(loc.x, loc.y, r, 0, Math.PI*2);
+             ctx.fill();
+             ctx.closePath();
+
+             if (weights) {// if apartment
+                 ctx.fillStyle = 'white';
+                 ctx.fillRect(loc.x - (place.name.length * textSize)/2 - 5, loc.y + (r), place.name.length * 5 + 10, textSize * 5);
+             }
+
+             ctx.fillStyle = 'black';
+             ctx.fillText(place.name, loc.x - (place.name.length * textSize)/2, loc.y + (r*2) + textSize);
+             if (weights && weights[place.name]) {
+                 const rating = (weights[place.name]*100).toFixed().toString();
+                 ctx.fillText(rating, loc.x - (rating.length * textSize)/2, loc.y + (r*2) + textSize*3);
+             }
+
+         }
+
+         const weights = {
+             grocery: 100,
+             park: 50,
+             fitness: 300,
+         };
+
+         function distance(v1, v2) {
+             const diff = v1.sub(v2);
+             return diff.hyp();
+         }
+
+         function getModifiedWeights() {
+             const modifiedWeights = {};
+             
+             for (const apartment of apartments) {
+                 modifiedWeights[apartment.name] = 0;
+                 for (const place of places) {
+                     if (weights[place.type]) {
+                         modifiedWeights[apartment.name] += (1/distance(apartment.location, place.location)) * weights[place.type];
+                     }
+                 }
+             }
+             return modifiedWeights;
+         }
+
+         canvas.onclick = function (e) {
+             ctx.clearRect(0, 0, canvas.width, canvas.height);
+             while (apartments.length > 0) { apartments.pop() }
+             addApartment(e.x, e.y);
+             render();
+         };
+
+         function render() {
+             const modifiedWeights = getModifiedWeights();
+             for (const place of places) {
+                 renderBuffer(place);
+             }
+
+             for (const place of places) {
+                 renderPlace(place);
+             }
+             for (const apartment of apartments) {
+                 renderPlace(apartment, modifiedWeights);
+             }
+
+
+         }
+         render();
+         
+        </script>
+    </body>
+</html>
