@@ -1,422 +1,486 @@
-<canvas id="stage" width="600" height="600"></canvas>
-
-<script>
- const canvas = document.getElementById('stage'),
-       ctx = canvas.getContext('2d');
-
- class Cell {
-     constructor(val) {
-         this.shown = false;
-         this.val = val;
-         this.flagged = false;
-     }
-
-     show() {
-         this.shown = true;
-     }
-
-     getLabel() {
-         if (this.shown) {
-             return this.val.toString();
-         } else if (this.flagged) {
-             return '⚑';
-         } if (!this.shown) {
-             return ' ';
+<main>
+    <header>
+        <h2>Sweeper</h2>
+    </header>
+    <div id="stage-container">
+        <div id="stage"></div>
+        <div id="controls">
+            <select id="difficulty">
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>        
+            </select>
+            <button onclick="start(event);">Start</button>
+        </div>
+    </div>
+    <div>
+        <p>
+            Left click reveals what is in the square.
+        </p>
+        <p>
+            Right click marks the square with a flag.
+        </p>
+        <p>
+            Mark all bomb squares with a flag to win.
+        </p>
+        
+    </div>
+    <script>
+     function start() {
+         if (stage.children.length > 0) {
+             stage.removeChild(stage.children[0]);
          }
-     }
-     
-     toggleFlag() {
-         if (!this.shown) {
-             this.flagged = !this.flagged;
+         const d = difficulty.value;
+         let o = { boxSize: 20 };
+         switch (d) {
+             case "Easy":
+                 o.size = 10;
+                 break;
+             case "Medium":
+                 o.size = 15;
+                 break;
+             case "Hard":
+                 o.size = 30;
+                 break;
          }
+         g = new Minesweeper(stage, o);
      }
+    </script>
 
-     isBomb() {
-         return false;
-     }
- }
-
- class Bomb extends Cell {
-     constructor() {
-         super('B');
-     }
-
-     isBomb() {
-         return true;
-     }
- }
-
- class Game {
-     constructor(init={}) {
-         const boxSize = 10;
-         
-         this.size = init.size || 10;
-         
-         this.bombs = init.bombs;
-         if (this.bombs === undefined) {
-             this.bombs = Math.ceil((this.size*this.size)/10);
+    <script>
+     class Cell {
+         constructor(val) {
+             this.shown = false;
+             this.val = val;
+             this.flagged = false;
          }
-         
-         this.padding = (canvas.height/2)-(this.size*boxSize);//canvas.width-(this.size*30);
-         this.marginBottom = 75;
 
-         this.initialize();
+         show() {
+             this.shown = true;
+         }
 
-         this.draw();
-         this.attachHandlers();
-     }
-
-     incrementBombCells() {
-         const increment = (x, y) => {
-             const cell = this.get(x, y);
-             if (y >= this.grid.length || cell.isBomb()) {
-                 return null;
+         getLabel() {
+             if (this.shown) {
+                 return this.val.toString();
+             } else if (this.flagged) {
+                 return '⚑';
+             } if (!this.shown) {
+                 return ' ';
              }
-             cell.val += 1;
          }
-
-         this.bombIndices.forEach(v => {
-             this.adjacents(...v).forEach(v => increment(...v));
-         });
-     }
-
-     initialize() {
-         this.clicked = false;
-         this.numShown = 0;
          
-         this.shown = [];
-         this.grid = [];
-         for (let i=0; i<this.size; ++i) {
-             const row = [];
-             for (let j=0; j<this.size; ++j) {
-                 row.push(new Cell(0));
+         toggleFlag() {
+             if (!this.shown) {
+                 this.flagged = !this.flagged;
              }
-             this.grid.push(row);
-         }
-         
-         const bombBag = this.getRandomIndices();
-         this.bombIndices = [];
-         for (let i=0; i<this.bombs; ++i) {
-             const v = bombBag[i];
-             this.bombIndices.push(v);
-             this.grid[v[0]][v[1]] = new Bomb();
          }
 
+         isBomb() {
+             return false;
+         }
      }
 
-     intersects(x, y) {
-         this.grid.forEach((a, i) => {
-             a.forEach((b, j) => {
-                 const { bx, by, bw, bh } = this.getBoundingRect(a, b);
+     class Bomb extends Cell {
+         constructor() {
+             super('B');
+         }
 
-                 // collision detection here
-             });
-         });
+         isBomb() {
+             return true;
+         }
      }
 
-     getBoxSize() {
-         return (canvas.width-(this.padding*2))/this.grid.length;
-     }
+     class Minesweeper {
+         constructor(parent, init={}) {
+             this.size = init.size || 10;
+             this.boxSize = init.boxSize || 40;
+             
+             this.bombs = init.bombs;
+             if (this.bombs === undefined) {
+                 this.bombs = Math.ceil((this.size*this.size)/10);
+             }
+             
+             this.canvas = document.createElement('canvas');
+             this.canvas.height = this.size * this.boxSize;
+             this.canvas.width = this.size * this.boxSize;             
+             this.ctx = this.canvas.getContext('2d');
+             
+             parent.appendChild(this.canvas);
 
-     forEach(f) {
-         this.grid.forEach((a, i) => {
-             a.forEach((item, j) => {
-                 f(item, i, j);
-             });
-         });
-     }
+             this.initialize();
 
-     getBoundingRect(x, y) {
-         const boxSize = this.getBoxSize(),
-               offsetX = this.padding,
-               offsetY = this.padding - this.marginBottom;
-         
-         return {
-             x: offsetX + boxSize * x,
-             y: offsetY + boxSize * y,
-             w: boxSize,
-             h: boxSize,
-         };
-     }
+             this.draw();
+             this.attachHandlers();
+         }
 
-     draw() {
-         ctx.clearRect(0, 0, canvas.width, canvas.height);
-         
-         let y = 0;
-         this.grid.forEach((a, i) => {
-             let x = 0;
-
-             a.forEach((item, j) => {
-                 const { x, y, w, h } = this.getBoundingRect(i, j);
-
-                 if (this.lost && item.isBomb()) {
-                     ctx.fillStyle = 'red';
-                 } else {
-                     ctx.fillStyle = item.shown ? 'gray' : 'lightgray';
+         incrementBombCells() {
+             const increment = (x, y) => {
+                 const cell = this.get(x, y);
+                 if (y >= this.grid.length || cell.isBomb()) {
+                     return null;
                  }
+                 cell.val += 1;
+             }
 
-                 ctx.fillRect(x, y, w, h);
+             this.bombIndices.forEach(v => {
+                 this.adjacents(...v).forEach(v => increment(...v));
+             });
+         }
 
-                 if (item.val !== 0 || item.flagged) {
-                     ctx.fillStyle = item.shown ? 'white' : 'black';
-                     
-                     let fontSize = this.getBoxSize()/2;
-                     if (item.flagged && !item.shown) {
-                         ctx.fillStyle = 'darkred';
-                         fontSize = fontSize*1.5;
+         initialize() {
+             this.clicked = false;
+             this.numShown = 0;
+             
+             this.shown = [];
+             this.grid = [];
+             for (let i=0; i<this.size; ++i) {
+                 const row = [];
+                 for (let j=0; j<this.size; ++j) {
+                     row.push(new Cell(0));
+                 }
+                 this.grid.push(row);
+             }
+             
+             const bombBag = this.getRandomIndices();
+             this.bombIndices = [];
+             for (let i=0; i<this.bombs; ++i) {
+                 const v = bombBag[i];
+                 this.bombIndices.push(v);
+                 this.grid[v[0]][v[1]] = new Bomb();
+             }
+
+         }
+
+         intersects(x, y) {
+             this.grid.forEach((a, i) => {
+                 a.forEach((b, j) => {
+                     const { bx, by, bw, bh } = this.getBoundingRect(a, b);
+
+                     // collision detection here
+                 });
+             });
+         }
+
+         forEach(f) {
+             this.grid.forEach((a, i) => {
+                 a.forEach((item, j) => {
+                     f(item, i, j);
+                 });
+             });
+         }
+
+         getBoundingRect(x, y) {
+             const boxSize = this.boxSize;
+             return {
+                 x: boxSize * x,
+                 y: boxSize * y,
+                 w: boxSize,
+                 h: boxSize,
+             };
+         }
+
+         draw() {
+             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+             
+             let y = 0;
+             this.grid.forEach((a, i) => {
+                 let x = 0;
+
+                 a.forEach((item, j) => {
+                     const { x, y, w, h } = this.getBoundingRect(i, j);
+
+                     if (this.lost && item.isBomb()) {
+                         this.ctx.fillStyle = 'red';
+                     } else {
+                         this.ctx.fillStyle = item.shown ? 'gray' : 'lightgray';
                      }
 
-                     ctx.font = fontSize + 'px Arial';
-                     ctx.fillText(item.getLabel(), x - fontSize/3 + w/2, y + fontSize/3 + h/2);
+                     this.ctx.fillRect(x, y, w, h);
 
-                 }
+                     if (item.val !== 0 || item.flagged) {
+                         this.ctx.fillStyle = item.shown ? 'white' : 'black';
+                         
+                         let fontSize = this.boxSize/2;
+                         if (item.flagged && !item.shown) {
+                             this.ctx.fillStyle = 'darkred';
+                             fontSize = fontSize*1.5;
+                         }
 
-                 ctx.strokeStyle = item.shown ? 'darkgray' : 'darkgray';
-                 ctx.strokeRect(x, y, w, h);
+                         this.ctx.font = fontSize + 'px Arial';
+                         this.ctx.fillText(item.getLabel(), x - fontSize/3 + w/2, y + fontSize/3 + h/2);
+
+                     }
+
+                     this.ctx.strokeStyle = item.shown ? 'darkgray' : 'darkgray';
+                     this.ctx.strokeRect(x, y, w, h);
+                 });
              });
-         });
-     }
+         }
 
-     resetNonBombs() {
-         this.forEach(function (e, x, y) {
-             if (!e.isBomb()) {
-                 e.val = 0;
+         resetNonBombs() {
+             this.forEach(function (e, x, y) {
+                 if (!e.isBomb()) {
+                     e.val = 0;
+                 }
+             });
+         }
+
+         get(x, y) {
+             if (x >= this.grid.length || x < 0 || y >= this.grid.length || y < 0 ){
+                 return null;
              }
-         });
-     }
-
-     get(x, y) {
-         if (x >= this.grid.length || x < 0 || y >= this.grid.length || y < 0 ){
-             return null;
+             return this.grid[x][y];
          }
-         return this.grid[x][y];
-     }
 
-     adjacents(x, y) {
-         const adjacents = [];
-         const push = (x, y) => {
-             const e = this.get(x, y);
-             if (e !== null) {
-                 adjacents.push([x, y]);
-             }
-         }
-         
-         push(x+1, y);
-         push(x-1, y);
-         push(x, y+1);
-         push(x, y-1);
-         
-         push(x-1, y+1);
-         push(x+1, y+1);
-         push(x+1, y-1);
-         push(x-1, y-1);
-
-         return adjacents;
-     }
-
-     
-     swapBombsSurrounding(x, y) {
-         let cell = this.get(x, y);
-         const adjacents = this.adjacents(x, y).concat([[x, y]]);
-         if (cell.isBomb()) {
-             cell = this.swapBomb(x, y, adjacents);
-         }
-         
-         adjacents.forEach(v => {
-             this.swapBomb(v[0], v[1], adjacents)
-         });
-         return cell;
-     }
-
-     swapBomb(x, y, nots=[]) {
-         const bomb = this.get(x, y);
-         if (!bomb.isBomb()) {
-             return null;
-         }
-         for (const v of this.getRandomIndices()) {
-             let has = false;
-             for (const e of nots) {
-                 if (v[0] === e[0] && v[1] === e[1]) {
-                     has = true;
-                     break;
+         adjacents(x, y) {
+             const adjacents = [];
+             const push = (x, y) => {
+                 const e = this.get(x, y);
+                 if (e !== null) {
+                     adjacents.push([x, y]);
                  }
              }
              
-             const cell = this.get(v[0], v[1]);
+             push(x+1, y);
+             push(x-1, y);
+             push(x, y+1);
+             push(x, y-1);
+             
+             push(x-1, y+1);
+             push(x+1, y+1);
+             push(x+1, y-1);
+             push(x-1, y-1);
 
-             if (!cell.isBomb() && !has) {
-                 this.grid[v[0]][v[1]] = bomb;
-                 this.grid[x][y] = cell;
-
-                 this.bombIndices.forEach((e, i) => { // slow
-                     if (e[0] === x && e[1] === y) {
-                         this.bombIndices[i] = v;
-                     }
-                 });
-
-                 return cell;
-             }
+             return adjacents;
          }
-         return bomb;
-     }
 
-     attachHandlers() {
-         canvas.oncontextmenu = function (e) {
-             e.preventDefault();
-         };
          
-         canvas.onmousedown = e => {
-             if (!this.lost && !this.won) {
-                 let minDistance = Infinity,
-                     min = null,
-                     minCoords = null;
+         swapBombsSurrounding(x, y) {
+             let cell = this.get(x, y);
+             const adjacents = this.adjacents(x, y).concat([[x, y]]);
+             if (cell.isBomb()) {
+                 cell = this.swapBomb(x, y, adjacents);
+             }
+             
+             adjacents.forEach(v => {
+                 this.swapBomb(v[0], v[1], adjacents)
+             });
+             return cell;
+         }
 
-                 const r = canvas.getBoundingClientRect(),
-                       x = e.clientX - r.x,
-                       y = e.clientY - r.y;
+         swapBomb(x, y, nots=[]) {
+             const bomb = this.get(x, y);
+             if (!bomb.isBomb()) {
+                 return null;
+             }
+             for (const v of this.getRandomIndices()) {
+                 let has = false;
+                 for (const e of nots) {
+                     if (v[0] === e[0] && v[1] === e[1]) {
+                         has = true;
+                         break;
+                     }
+                 }
+                 
+                 const cell = this.get(v[0], v[1]);
 
-                 this.grid.forEach((a, i) => {
-                     a.forEach((b, j) => {
-                         const v = this.getBoundingRect(i, j);
-                         const boxSize = this.getBoxSize()/2;
-                         const d = distance(x, y, v.x + boxSize , v.y + boxSize);
-                         minDistance = Math.min(minDistance, d);
-                         if (minDistance === d) {
-                             min = b;
-                             minCoords = [i, j];
+                 if (!cell.isBomb() && !has) {
+                     this.grid[v[0]][v[1]] = bomb;
+                     this.grid[x][y] = cell;
+
+                     this.bombIndices.forEach((e, i) => { // slow
+                         if (e[0] === x && e[1] === y) {
+                             this.bombIndices[i] = v;
                          }
                      });
-                 });
 
-                 if (!this.clicked) {
-                     min = this.swapBombsSurrounding(...minCoords);
-                     this.incrementBombCells();
+                     return cell;
                  }
+             }
+             return bomb;
+         }
 
-                 if (e.which === 1) { // left click
-                     if (min.flagged) {
-                         return;
+         attachHandlers() {
+             this.canvas.oncontextmenu = function (e) {
+                 e.preventDefault();
+             };
+             
+             this.canvas.onmousedown = e => {
+                 if (!this.lost && !this.won) {
+                     let minDistance = Infinity,
+                         min = null,
+                         minCoords = null;
+
+                     const r = this.canvas.getBoundingClientRect(),
+                           x = e.clientX - r.x,
+                           y = e.clientY - r.y;
+
+                     this.grid.forEach((a, i) => {
+                         a.forEach((b, j) => {
+                             const v = this.getBoundingRect(i, j);
+                             const boxSize = this.boxSize/2;
+                             const d = distance(x, y, v.x + boxSize , v.y + boxSize);
+                             minDistance = Math.min(minDistance, d);
+                             if (minDistance === d) {
+                                 min = b;
+                                 minCoords = [i, j];
+                             }
+                         });
+                     });
+
+                     if (!this.clicked) {
+                         min = this.swapBombsSurrounding(...minCoords);
+                         this.incrementBombCells();
                      }
 
-                     this.lost = min.isBomb();
-                     if (this.lost) {
-                         this.bombIndices.forEach(v => this.get(...v).show());
-                         this.draw();
-                         return;
-                     }
-
-                     const tryShow = (x, y) => {
-                         if (x >= this.grid.length || x < 0 || y >= this.grid.length || y < 0 || this.grid[x][y].flagged){
-                             return false;
+                     if (e.which === 1) { // left click
+                         if (min.flagged) {
+                             return;
                          }
-                         const cell = this.grid[x][y];
-                         
-                         if (this.grid[x][y].val !== 0 || this.grid[x][y].shown) {
+
+                         this.lost = min.isBomb();
+                         if (this.lost) {
+                             alert('BOOM! You lose!');
+                             this.bombIndices.forEach(v => this.get(...v).show());
+                             this.draw();
+                             return;
+                         }
+
+                         const tryShow = (x, y) => {
+                             if (x >= this.grid.length || x < 0 || y >= this.grid.length || y < 0 || this.grid[x][y].flagged){
+                                 return false;
+                             }
+                             const cell = this.grid[x][y];
+                             
+                             if (this.grid[x][y].val !== 0 || this.grid[x][y].shown) {
+                                 if (!cell.shown) {
+                                     this.numShown += 1;
+                                     cell.show();
+                                 }
+                                 return false;
+                             }
+
                              if (!cell.shown) {
                                  this.numShown += 1;
                                  cell.show();
                              }
-                             return false;
+                             return true;
                          }
 
-                         if (!cell.shown) {
+                         function showAdjacents(x, y) {
+                             if (tryShow(x+1, y)) showAdjacents(x+1, y);
+                             if (tryShow(x-1, y)) showAdjacents(x-1, y);
+                             if (tryShow(x, y+1)) showAdjacents(x, y+1);
+                             if (tryShow(x, y-1)) showAdjacents(x, y-1);
+                             
+                             if (tryShow(x-1, y+1)) showAdjacents(x-1, y+1);
+                             if (tryShow(x+1, y+1)) showAdjacents(x+1, y+1);
+                             if (tryShow(x+1, y-1)) showAdjacents(x+1, y-1);
+                             if (tryShow(x-1, y-1)) showAdjacents(x-1, y-1);                                          
+                         }
+
+                         if (min.val === 0) {
+                             showAdjacents(minCoords[0], minCoords[1]);
+                         }
+
+                         if (!min.shown) {
                              this.numShown += 1;
-                             cell.show();
+                             min.show();
                          }
-                         return true;
+                     } else { // right click
+                         min.toggleFlag();
                      }
 
-                     function showAdjacents(x, y) {
-                         if (tryShow(x+1, y)) showAdjacents(x+1, y);
-                         if (tryShow(x-1, y)) showAdjacents(x-1, y);
-                         if (tryShow(x, y+1)) showAdjacents(x, y+1);
-                         if (tryShow(x, y-1)) showAdjacents(x, y-1);
-                         
-                         if (tryShow(x-1, y+1)) showAdjacents(x-1, y+1);
-                         if (tryShow(x+1, y+1)) showAdjacents(x+1, y+1);
-                         if (tryShow(x+1, y-1)) showAdjacents(x+1, y-1);
-                         if (tryShow(x-1, y-1)) showAdjacents(x-1, y-1);                                          
+                     this.won = this.numShown === (this.size*this.size)-this.bombs;
+                     if (this.won) {
+                         alert('You win!');
+                         this.bombIndices.forEach(v => this.get(...v).flagged = true);
                      }
 
-                     if (min.val === 0) {
-                         showAdjacents(minCoords[0], minCoords[1]);
-                     }
-
-                     if (!min.shown) {
-                         this.numShown += 1;
-                         min.show();
-                     }
-                 } else { // right click
-                     min.toggleFlag();
+                     this.clicked = true;
+                     this.draw();
                  }
+             };
+             
+             window.onkeydown = e => {
+                 switch (e.key) {
+                     case 'ArrowUp':
+                         console.log('up');
+                         break;
+                     case 'ArrowDown':
 
-                 this.won = this.numShown === (this.size*this.size)-this.bombs;
-                 if (this.won)
-                     this.bombIndices.forEach(v => this.get(...v).flagged = true);
+                         break;
 
-                 this.clicked = true;
-                 this.draw();
-             }
-         };
-         
-         window.onkeydown = e => {
-             switch (e.key) {
-                 case 'ArrowUp':
-                     console.log('up');
-                     break;
-                 case 'ArrowDown':
+                     case 'ArrowLeft':
 
-                     break;
+                         break;
+                     case 'ArrowRight':
 
-                 case 'ArrowLeft':
+                         break;
+                     case 'Enter':
 
-                     break;
-                 case 'ArrowRight':
-
-                     break;
-                 case 'Enter':
-
-                     break;
-             }
-         };
-     }
-
-     toString() {
-         let str = '';
-         for (const row of this.grid) {
-             str += row.join(' ') + '\n';  
+                         break;
+                 }
+             };
          }
-         return str;
-     }
 
-     getRandomIndices() {
-         return shuffle(this.getIndices());
-     }
-
-     getIndices() {
-         const xs = [];
-         for (let i=0; i<this.grid.length; ++i) {
-             for (let j=0; j<this.grid.length; ++j) {
-                 xs.push([i, j]);
+         toString() {
+             let str = '';
+             for (const row of this.grid) {
+                 str += row.join(' ') + '\n';  
              }
+             return str;
          }
-         return xs;
+
+         getRandomIndices() {
+             return shuffle(this.getIndices());
+         }
+
+         getIndices() {
+             const xs = [];
+             for (let i=0; i<this.grid.length; ++i) {
+                 for (let j=0; j<this.grid.length; ++j) {
+                     xs.push([i, j]);
+                 }
+             }
+             return xs;
+         }
      }
- }
 
- function shuffle(a) {
-     for (let i=0; i<a.length-2; ++i) {
-         const j = Math.floor(Math.random()*a.length),
-               temp = a[j];
-         a[j] = a[i];
-         a[i] = temp;
+     function shuffle(a) {
+         for (let i=0; i<a.length-2; ++i) {
+             const j = Math.floor(Math.random()*a.length),
+                   temp = a[j];
+             a[j] = a[i];
+             a[i] = temp;
+         }
+         return a;
      }
-     return a;
- }
 
- function distance(x1, y1, x2, y2) {
-     return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
- }
+     function distance(x1, y1, x2, y2) {
+         return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+     }
 
- const g = new Game();
-</script>
+     const stage = document.getElementById('stage');
+     let g = null;
+     start();
+    </script>
+    
+    <style>
+     canvas {
+         display: block;
+         margin: auto auto;
+     }
+
+     #stage-container {
+         width: max-content;
+         display: block;
+         margin: auto auto;
+     }
+
+     #controls {
+         margin-top: 5px;
+     }
+    </style>
+
+</main>

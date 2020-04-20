@@ -1,32 +1,34 @@
-Ways of doing BFS:
+<main>
+    Ways of doing BFS:
 
-"Frontier" way (found from open course MIT):
-<script>
- function bfs() {
-     let frontier = [root],
-         i = 0,
-         level = {};
+    "Frontier" way (found from open course MIT):
+    <script>
+     function bfs() {
+         let frontier = [root],
+             i = 0,
+             level = {};
 
 
-     while (frontier.length > 0) {
-         let next_frontier = [];
-         for (node of frontier) {
-             level[node] = i;
-             for (child of node.children) {
-                 next_frontier.append(child);
+         while (frontier.length > 0) {
+             let next_frontier = [];
+             for (node of frontier) {
+                 level[node] = i;
+                 for (child of node.children) {
+                     next_frontier.append(child);
+                 }
              }
+             i += 1;
+             frontier = next_frontier;
          }
-         i += 1;
-         frontier = next_frontier;
      }
- }
 
-</script>
+    </script>
 
 
-other way:
-<script>
- queue = []
- while queue:
-         
-</script>
+    other way:
+    <script>
+     queue = []
+     while queue:
+             
+    </script>
+</main>

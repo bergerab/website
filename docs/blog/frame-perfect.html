@@ -18,41 +18,56 @@
             <a href="../games/index.html">Games</a>
             <a href="../blog/index.html">Blog</a>
             <a href="../projects/index.html">Projects</a>
-            <a href="../drawings/index.html">Drawings</a>
+            <a href="../art/index.html">Art</a>
         </nav>
         <main>
+            <main>
     <article>
         <header>
+            <span class="date">Dec 2018</span>
             <h1>Frame Perfect</h1>
         </header>
-        <p>
-            "Frame perfect" is a term to describe the level of difficulty for an action in certain video games (Street Fighter, and various speed runs).
-            It has to do with the amount of time allowed for a player to send input to the game. When someone executes a frame perfect trick in a speed run
-            it is because they pressed the right button (or buttons) at just the right time. Typically within a 0.02 second time window.
-            Usually a game is difficult if it requires many frame perfect tricks or combos. Even after playing and watching games that use frame perfect tricks
-            as an indicator of skill, it has been unclear exactly how hard a frame perfect trick is. These games makes me question:
-        </p>
+        <section>
+            <p>
+                "Frame perfect" is a term used frequently in speedrunning, and fighting games (like Street Fighter).
+                For a newcomer, the term is mysterious. You will hear expert players throwing it around when talking about the hardest parts of a game.
+                What does it mean to be frame perfect?
+            </p>
+            <p>
+                It has to do with the time window that a player must send some input to the game. When someone executes a frame perfect trick in a speed run
+                it is because they pressed the right button (or buttons) within some (usually small) amount of time. Typically within a 0.02 second time window.
+                Usually a game is difficult if it requires many frame perfect tricks or combos. Even after playing and watching games that use frame perfect tricks
+                as an indicator of skill, it has been unclear exactly how hard a frame perfect trick is. It is easy for a speedrunner to explain a trick's difficulty
+                simply by saying "That was frame perfect". But is that really enough information to know how hard the trick was?
+            </p>
 
-        <p>
-            Is it possible for a person to execute frame perfect tricks reliably? If not, does someone's accuracy rely on chance?
-            If so, what chance does someone have to land a frame perfect trick? How much harder is it to land a one frame in
-            a 60FPS game vs a 30FPS game? What about a 120FPS game? What if the frame rate is not constant?
-        </p>
+            <p>
+                Maybe by thinking about frame perfectness in terms of probability, we can understand just how hard it is, for different games.
+                Maybe then we could answer:
+            </p>
+
+            <p>
+                Is it possible for a person to execute frame perfect tricks reliably? If not, does someone's accuracy rely on chance?
+                If so, what chance does someone have to land a frame perfect trick? How much harder is it to land a one frame in
+                a 60FPS game vs a 30FPS game? What about a 120FPS game? What if the frame rate is not constant (as most, especially older, games are)?
+            </p>
+        </section>
 
         <section>
             <header>
-                <h2>What's a Frame</h2>
+                <h2>What's in a Frame?!</h2>
             </header>
             <p>
                 One degree of difficulty for a "frame perfect" trick relies on the update interval for the particular animation you're interacting with.
                 This update interval is called a "frame". The term "frame" can also refer to a single picture rendered as part of an animation; however,
                 for our purposes the rendering of these frames is unrelated to the update interval (although often they are on the same interval).
                 An update frame is the moment when physics simulations, and input checking is handled within the game. Currently, it is common for this
-                to occur at 60 Hz. This means that inputs to the game, collisions, delays, and other parts of the game's logic are checked every
+                to occur at 60 times per second. This means that inputs to the game, collisions, delays, and other parts of the game's logic are checked every
                 0.01666 seconds.
             </p>
             <p>
-                There are games that use other update intervals, such as 30 Hz, and even games which have glitches that don't have stable update intervals. 
+                There are games that use other update intervals, such as 30 times a second, and games which have glitches that don't have stable update intervals.
+                Instable update intervals can be caused by anything that consumes more priority than the update loop (could be loading models, or physics calculations).
             </p>
         </section>
 
@@ -61,7 +76,7 @@
                 <h2>Why have Frame Perfect Tricks?</h2>
             </header>
             <p>
-                Frame perfect tricks exist for two reasons: to exploit programming errors, and a designed game mechanic. Both reasons
+                Frame perfect tricks exist for two reasons: an exploit for speedrunners, or a designed game mechanic. Both reasons
                 introduce a means for some players to perform better at the game if they are able to give the game an input within this small window
                 of one frame.
             </p>
@@ -71,8 +86,8 @@
                     <h3>Exploits</h3>
                 </header>
                 <p>
-                    Some frame perfect tricks often because of some race condition
-                    or logic error. A game may accidentally allow for a player's character execute two inputs at once or in a succession
+                    Some frame perfect tricks are due to some race condition
+                    or logic error in the game's code. A game may accidentally allow for a player's character execute two inputs at once or in a succession
                     in a way that was not intended. For example, a frame perfect jump command could allow for a player to jump twice instead
                     of only once. The programming error behind many of these exploits involves updating a state after it is used for control flow:
                 </p>
@@ -97,12 +112,12 @@ if (character.isHit) {
                     a jump command on the frame following being hit by an enemy, the player can jump before they are stunned. If inputed any later, the exploit will not work.
                 </p>
                 <p>
-                    The exploit above could be used in a speed run to continue moving your character even after being hit by an enemy.
+                    The exploit above could be used in a speedrun to continue moving your character even after being hit by an enemy.
                     Perhaps there is a part of the game where it would typically be a slow route due to being stunned by enemies, but a frame perfect trick
                     could turn what would have been a stun into a savings of 1 second.
-                    After such an exploit is found, the players who speed runs this imaginary game would then attempt to find places to execute this frame perfect trick
-                    to achieve a lower time for the speed run. The more frame perfect tricks a game has, the harder
-                    the speed run is. If a game has many frame perfect tricks, the skill cap (the amount of skill required to achieve the absolute best speed run time), is high which
+                    After such an exploit is found, the players who speed runs this game would then attempt to find places to execute this frame perfect trick
+                    to achieve a lower time for the speedrun. It is seen that the more frame perfect tricks a game has, the harder
+                    the speedrun is. If a game has many frame perfect tricks, the skill cap (the amount of skill required to achieve the absolute best speed run time), is high which
                     results in a more rewarding game.
                 </p>
             </section>
@@ -138,15 +153,6 @@ if (character.isHit) {
 
         <section>
             <header>
-                <h2>Complications</h2>
-            </header>
-            <p>
-                For example, if some intense physics calculation is occurring, one frame could be extended and in turn push back the times of the other frames.
-            </p>
-        </section>
-
-        <section>
-            <header>
                 <h2>Probability</h2>
             </header>
             <p>
@@ -155,277 +161,310 @@ if (character.isHit) {
                 We can answer this by first making a few assumptions.
             </p>
 
-            <ul>
-                <li>Assumption 1: The user is able to click the button randomly.</li>
-                <li>Assumption 2: The user is able to guess with perfect accuracy a one second window that contains the target frame.</li>                
-            </ul>
+            <ol>
+                <li>The player is able to click a button at a uniform random time within a time window.</li>
+                <li>The player is able to guess perfectly when this window that contains the target frame starts and ends.</li>                
+            </ol>
 
             <p>
-                Let's assume there is a frame perfect trick
-                somewhere within a one second window. If the game updates at 60 Hz, then there is a window of 16.66 ms in
-                that 1000 ms window where a frame perfect trick is possible. Then consider a player who has one random button
-                press within the one second window, in an attempt to get a frame perfect trick.
-            </p>
-            <p>
-                This would give us a probability of 16.66 / 1000 = 1.666% for a one second window. This is if the player
-                is clicking the button at random times, regardless of where the frame perfect interval is during that second.
-            </p>
-            <p>
-                So it is safe to say, if you can accurately determine how long a 1 second window of time is you can hit a frame perfect trick
-                1.666% of the time.
-            </p>
-            <p>
-                The more accurate the player is to estimating how much time has passed since the beginning of the window, their chances of hitting
-                the frame perfect trick increases. Here is a probability matrix of chances based on the interval the player is capable of determining:
-            </p>
-            <table style="width:100%">
-                <tr>
-                    <th></th>
-                    <th>30 FPS</th> 
-                    <th>60 FPS</th>
-                    <th>120 FPS</th>
-                </tr>
-                <tr>
-                    <td>1000 ms</td>
-                    <td>3.33%</td> 
-                    <td>1.66%</td>
-                    <td>0.83%</td>
-                </tr>
-                <tr>
-                    <td>750 ms</td>
-                    <td>4.44%</td> 
-                    <td>2.22%</td>
-                    <td>1.11%</td>
-                </tr>
-                <tr>
-                    <td>500 ms</td>
-                    <td>6.66%</td> 
-                    <td>3.33%</td>
-                    <td>1.6%</td>
-                </tr>
-                <tr>
-                    <td>250 ms</td>
-                    <td>13.33%</td> 
-                    <td>6.66%</td>
-                    <td>3.32%</td>
-                </tr>
-                <tr>
-                    <td>100 ms</td>
-                    <td>33.33%</td> 
-                    <td>16.66%</td>
-                    <td>8.33%</td>
-                </tr>
-                <tr>
-                    <td>50 ms</td>
-                    <td>66.66%</td> 
-                    <td>33.33%</td>
-                    <td>16.66%</td>
-                </tr>
-                <tr>
-                    <td>25 ms</td>
-                    <td>100%</td> 
-                    <td>66.66%</td>
-                    <td>33.33%</td>
-                </tr>
-            </table>
-            <p>
-                The left column (interval column) applies to a player if they can accurately determine when an interval of that time has passed.
-                Imagine you were told to yell 500 ms after a light is flashed. This is what is meant by determining how long an interval is.
-                If you can determine 500 ms intervals, and you only have one click to guess when the frame perfect trick is, on a 60 fps game you
-                will hit the frame perfect trick 3.33% of the time. This is if you only have one chance.
+                The last assumption should raise an eyebrow because it is not too far from saying "assume the player can do the trick".
+                But for every player, there is some window that they can guess perfectly. If the game makes some sound or animation before the window starts and/or ends,
+                that's a clear sign for the player where the window is. Even if everyone has a different reaction speed, you could add that into the size of the window and keep the assumption.
+                For the same trick, the window size might have different sizes based on the player's reaction speed. A regular player might be certain of windows of size 1/2 seconds, while a new player might only be confident about a window of 1 second.
             </p>
 
-            <p>
-                There are frame perfect tricks that can be guessed using more than one button press. If you only must register a button press on the
-                correct frame, and failed button presses are allowed, our chances of landing a frame perfect trick increases greatly. Let's create another
-                probability matrix, this time with number of trials and all for a 60 Hz game.
-            </p>
-            <table style="width:100%">
-                <tr>
-                    <th></th>
-                    <th>1 Click</th> 
-                    <th>2 Clicks</th>
-                    <th>3 Clicks</th>
-                </tr>
-                <tr>
-                    <td>1000 ms</td>
-                    <td>1.66%</td> 
-                    <td>3.33%</td>
-                    <td>5%</td>
-                </tr>
-                <tr>
-                    <td>750 ms</td>
-                    <td>2.22%</td> 
-                    <td>4.44%</td>
-                    <td>6.66%</td>
-                </tr>
-                <tr>
-                    <td>500 ms</td>
-                    <td>3.33%</td> 
-                    <td>6.66%</td>
-                    <td>10%</td>
-                </tr>
-                <tr>
-                    <td>250 ms</td>
-                    <td>6.66%</td> 
-                    <td>13.33%</td>
-                    <td>20%</td>
-                </tr>
-                <tr>
-                    <td>100 ms</td>
-                    <td>16.66%</td> 
-                    <td>33.33%</td>
-                    <td>50%</td>
-                </tr>
-                <tr>
-                    <td>50 ms</td>
-                    <td>33.33%</td> 
-                    <td>66.66%</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td>25 ms</td>
-                    <td>66.66%</td> 
-                    <td>100%</td>
-                    <td>100%</td>
-                </tr>
-            </table>
-            <p>
-                This is a lower bound as we have assumed that these trials are completely independent. Doing so overcounts button presses because we count for the
-                unrealistic trials where the button is clicked at the exact same time during the same interval.
-            </p>
+            <section>
+                <header>
+                    <h3>Static Frame Rates</h3>
+                </header>
+
+                <p>
+                    Let's assume there is a frame perfect trick
+                    somewhere within a one second window. If the game updates at 60 FPS, then there is a window of 16.66 ms in
+                    that 1 second (1000 ms) window where a frame perfect trick is possible. Then consider a player who has one random button
+                    press within the one second window, in an attempt to get a frame perfect trick.
+                </p>
+                <p>
+                    This would give us a probability of 16.66 / 1000 = 1.666% for a one second window. This is if the player
+                    is clicking the button at random times, regardless of where the frame perfect interval is during that second.
+                </p>
+                <p>
+                    If you can accurately determine how long a 1 second window of time is you can hit a frame perfect trick
+                    1.666% of the time.
+                </p>
+                <p>
+                    The more accurate the player is to estimating how much time has passed since the beginning of the window, their chances of hitting
+                    the frame perfect trick increases. Here is a probability matrix of chances based on the interval the player is capable of determining:
+                </p>
+                <table style="width:100%">
+                    <tr>
+                        <th></th>
+                        <th>30 FPS</th> 
+                        <th>60 FPS</th>
+                        <th>120 FPS</th>
+                    </tr>
+                    <tr>
+                        <td>1000 ms</td>
+                        <td>3.33%</td> 
+                        <td>1.66%</td>
+                        <td>0.83%</td>
+                    </tr>
+                    <tr>
+                        <td>750 ms</td>
+                        <td>4.44%</td> 
+                        <td>2.22%</td>
+                        <td>1.11%</td>
+                    </tr>
+                    <tr>
+                        <td>500 ms</td>
+                        <td>6.66%</td> 
+                        <td>3.33%</td>
+                        <td>1.6%</td>
+                    </tr>
+                    <tr>
+                        <td>250 ms</td>
+                        <td>13.33%</td> 
+                        <td>6.66%</td>
+                        <td>3.32%</td>
+                    </tr>
+                    <tr>
+                        <td>100 ms</td>
+                        <td>33.33%</td> 
+                        <td>16.66%</td>
+                        <td>8.33%</td>
+                    </tr>
+                    <tr>
+                        <td>50 ms</td>
+                        <td>66.66%</td> 
+                        <td>33.33%</td>
+                        <td>16.66%</td>
+                    </tr>
+                    <tr>
+                        <td>25 ms</td>
+                        <td>100%</td> 
+                        <td>66.66%</td>
+                        <td>33.33%</td>
+                    </tr>
+                </table>
+                <p>
+                    The left column (interval column) applies to a player if they can accurately determine when an interval of that time has passed.
+                    Imagine you were told to yell 500 ms after a light is flashed. This is what is meant by determining how long an interval is.
+                    If you can determine 500 ms intervals, and you only have one click to guess when the frame perfect trick is, on a 60 FPS game you
+                    will hit the frame perfect trick 3.33% of the time. This is if you only have one chance.
+                </p>
+
+                <p>
+                    There are frame perfect tricks that can be guessed using more than one button press. If you only must register a button press on the
+                    correct frame, and failed button presses are allowed, our chances of landing a frame perfect trick increases greatly. Let's create another
+                    probability matrix, this time with number of trials and all for a 60 FPS game.
+                </p>
+                <table style="width:100%">
+                    <tr>
+                        <th></th>
+                        <th>1 Click</th> 
+                        <th>2 Clicks</th>
+                        <th>3 Clicks</th>
+                    </tr>
+                    <tr>
+                        <td>1000 ms</td>
+                        <td>1.66%</td> 
+                        <td>3.33%</td>
+                        <td>5%</td>
+                    </tr>
+                    <tr>
+                        <td>750 ms</td>
+                        <td>2.22%</td> 
+                        <td>4.44%</td>
+                        <td>6.66%</td>
+                    </tr>
+                    <tr>
+                        <td>500 ms</td>
+                        <td>3.33%</td> 
+                        <td>6.66%</td>
+                        <td>10%</td>
+                    </tr>
+                    <tr>
+                        <td>250 ms</td>
+                        <td>6.66%</td> 
+                        <td>13.33%</td>
+                        <td>20%</td>
+                    </tr>
+                    <tr>
+                        <td>100 ms</td>
+                        <td>16.66%</td> 
+                        <td>33.33%</td>
+                        <td>50%</td>
+                    </tr>
+                    <tr>
+                        <td>50 ms</td>
+                        <td>33.33%</td> 
+                        <td>66.66%</td>
+                        <td>100%</td>
+                    </tr>
+                    <tr>
+                        <td>25 ms</td>
+                        <td>66.66%</td> 
+                        <td>100%</td>
+                        <td>100%</td>
+                    </tr>
+                </table>
+                <p>
+                    
+                </p>
+            </section>
+
+            <!-- <section>
+                 <header>
+                 <h3>Variable Frame Rates</h3>
+                 </header>
+                 </section> -->
         </section>
 
-        <section>
-            <header>
-                <h2>An Experiment</h2>
-            </header>
+        <i>
+More to come on this later. Have an idea to create a live experiment where you can attempt frame perfect tricks, and see if the numbers above are at all accurate in the real world.
+        </i>
 
+        <!-- <section>
+             <header>
+             <h2>A Live Experiment</h2>
+             </header>
 
-            <figure>
-                <canvas id="stage" width="300" height="300"></canvas>
+             <p>
+             Below is a simulation of frame perfectness from a probability perspective.
+             You can choose how long the windows size is (the left column from the matrices above), the frame rate of the "game", and you can try to find the frame perfect window by clicking on the canvas sometime in that window.
+             Every time you play the simulation, it will randomize where the frame perfect window is. This ensures that the first assumption of the player clicking randomly is met (because the frame is out of the player's control).
+             </p>
 
-                <div>
-                    <button onclick="window.pressKey()">Click</button>
-                    <input onchange="window.switchAmount = value;" value="450"></input> ms
-                </div>
-                <select onchange="window.loopDelay = eval(value);">
-                    <option value="1/240 * 1000">240FPS</option>                                        
-                    <option value="1/120 * 1000">120FPS</option>                    
-                    <option value="1/60 * 1000" selected="selected">60FPS</option>
-                    <option value="() => 1/(Math.ceil((Math.random()*20)) + 40) * 1000">Random (40-60FPS)</option>
-                    <option value="1/30 * 1000">30FPS</option>
-                    <option value="1/10 * 1000">10FPS</option>
-                    <option value="1000">1FPS</option>
-                </select>
-                <div>
-                    Accuracy: 
-                    <span id="accuracy">0</span>%
-                </div>
-                
-                
-                <script>
-                 const canvas = document.getElementById('stage'),
-                       ctx = canvas.getContext('2d'),
-                       width = canvas.width,
-                       height = canvas.height;
+             <p>
+             To do one trial, click the canvas, and that will start the window immediately. Then the window will end when the window size is exceeded (by default 450 ms). There is a graphic drawn on the canvas when the window starts, ends, and if you succeed or fail.
+             You should click the canvas again once the window has started (you only get one attempt per trial). Try changing the frame rate and see how your accuracy changes. Do your results correspond with the probabilies above?
+             </p>
 
-                 let keyDownTime = null,
-                     keyDown = false;
+             <figure>
+             <style>
+             canvas {
+             border: 1px solid black;
+             }
+             </style>
+             <div style="width: max-content; margin: auto auto;">
+             <canvas id="stage" width="300" height="300"></canvas>
 
-                 
-                 window.keyDown = false;
-                 window.switchDelay = 450;
-                 window.loopDelay = 16.6666;
+             <div>
+             <button onclick="window.pressKey()">Click</button>
+             <input onchange="window.switchAmount = value;" value="450"></input> ms
+             </div>
+             <select onchange="window.loopDelay = eval(value);">
+             <option value="1/240 * 1000">240FPS</option>                                        
+             <option value="1/120 * 1000">120FPS</option>                    
+             <option value="1/60 * 1000" selected="selected">60FPS</option>
+             <option value="() => 1/(Math.ceil((Math.random()*20)) + 40) * 1000">Random (40-60FPS)</option>
+             <option value="1/30 * 1000">30FPS</option>
+             <option value="1/10 * 1000">10FPS</option>
+             <option value="1000">1FPS</option>
+             </select>
+             <div>
+             Accuracy: 
+             <span id="accuracy">0</span>%
+             </div>
+             
+             
+             <script>
+             const canvas = document.getElementById('stage'),
+             ctx = canvas.getContext('2d'),
+             width = canvas.width,
+             height = canvas.height;
 
-                 window.pressKey = function() {
-                     keyDown = true;
-                     keyDownTime = new Date();
-                 };
+             let keyDownTime = null,
+             keyDown = false;
 
-                 document.addEventListener('keydown', function (e) {
-                     if (e.key === ' ') {
-                         pressKey();
-                     }
-                 });
-                 document.addEventListener('keyup', function (e) {
-                     if (e.key === ' ') {
-                         keyDown = false;
-                     }
-                 });
+             
+             window.keyDown = false;
+             window.switchDelay = 450;
+             window.loopDelay = 16.6666;
 
-                 let framePerfectTime = null,
-                     waitingForFramePerfectInput = false,
-                     failedCounter = 0,
-                     successCounter = 0;
+             window.pressKey = function() {
+             keyDown = true;
+             keyDownTime = new Date();
+             };
 
-                 let trials = 0,
-                     successes = 0;
+             document.addEventListener('keydown', function (e) {
+             if (e.key === ' ') {
+             pressKey();
+             }
+             });
+             document.addEventListener('keyup', function (e) {
+             if (e.key === ' ') {
+             keyDown = false;
+             }
+             });
 
-                 const accuracyDisplay = document.getElementById('accuracy');
+             let framePerfectTime = null,
+             waitingForFramePerfectInput = false,
+             failedCounter = 0,
+             successCounter = 0;
 
-                 function loop() {
-                     let delay = window.loopDelay;
-                     if (typeof delay === 'function') {
-                         delay = delay();
-                     }
+             let trials = 0,
+             successes = 0;
 
-                     
-                     var now = new Date();
-                     
-                     if (failedCounter > 0) {
-                         ctx.fillStyle = 'red';
-                         ctx.fillRect(0, 0, width, height);
-                         ctx.fillStyle = 'white';
-                         ctx.font = '24pt Serif';
-                         const text = 'Early';
-                         ctx.fillText(text, -ctx.measureText(text).width/2 + width/2, height/2);
-                         failedCounter -= delay;
-                     } else if (successCounter > 0) {
-                         ctx.fillStyle = 'green';
-                         ctx.fillRect(0, 0, width, height);
-                         ctx.fillStyle = 'white';
-                         ctx.font = '24pt Serif';
-                         const text = 'Frame Perfect!';
-                         ctx.fillText(text, -ctx.measureText(text).width/2 + width/2, height/2);
-                         successCounter -= delay;
-                     } else {
-                         ctx.fillStyle = 'blue';
-                         ctx.fillRect(0, 0, width, height);
-                         
-                         if (keyDown) {
-                             framePerfectTime = new Date() + window.switchDelay;
-                             waitingForFramePerfectInput = true;
-                             keyDown = false;
-                         }
+             const accuracyDisplay = document.getElementById('accuracy');
 
-                         if (waitingForFramePerfectInput && now - framePerfectTime < window.switchDelay) {
-                             if (keyDown) {
-                                 failedCounter = 500;
-                             } else {
-                                 ctx.fillStyle = 'yellow';
-                             }
-                             ctx.fillRect(0, 0, width, height);
-                         } else if (framePerfectTime && now - framePerfectTime > window.switchDelay && keyDown) {
-                             console.log('late', keyDown)
-                         } else if (keyDown) {
-                             successCounter = 500;
-                             ++successes;
-                         }
-                     }
+             function loop() {
+             let delay = window.loopDelay;
+             if (typeof delay === 'function') {
+             delay = delay();
+             }
 
-                     console.log(delay);
-                     accuracyDisplay.innerHTML = trials === 0 ? 0 : 100 * successes / trials;
-                     setTimeout(loop, delay);
-                 }
-                 setTimeout(loop, window.loopDelay);
-                </script>
+             var now = new Date();
+             console.log(failedCounter, successCounter);
+             if (failedCounter > 0) {
+             ctx.fillRect(0, 0, width, height);
+             ctx.font = '24pt Serif';
+             const text = 'Early';
+             ctx.fillText(text, -ctx.measureText(text).width/2 + width/2, height/2);
+             failedCounter -= delay;
+             } else if (successCounter > 0) {
+             ctx.fillRect(0, 0, width, height);
+             ctx.fillStyle = 'white';
+             ctx.font = '24pt Serif';
+             const text = 'Frame Perfect!';
+             ctx.fillText(text, -ctx.measureText(text).width/2 + width/2, height/2);
+             successCounter -= delay;
+             } else {
+             ctx.fillText(0, 0, "oijwef");
+             if (keyDown) {
+             framePerfectTime = new Date(new Date().getTime() + window.switchDelay);
+             waitingForFramePerfectInput = true;
+             keyDown = false;
+             }
 
-            </figure>
-        </section>
+             if (waitingForFramePerfectInput && now - framePerfectTime < window.switchDelay) {
+             if (keyDown) {
+             failedCounter = 500;
+             } else {
+             ctx.fillStyle = 'yellow';
+             }
+             ctx.fillRect(0, 0, width, height);
+             } else if (framePerfectTime && now - framePerfectTime > window.switchDelay && keyDown) {
+             console.log('late', keyDown)
+             } else if (keyDown) {
+             
+             successCounter = 500;
+             ++successes;
+             }
+             }
+
+             accuracyDisplay.innerHTML = trials === 0 ? 0 : 100 * successes / trials;
+             setTimeout(loop, delay);
+             }
+             setTimeout(loop, window.loopDelay);
+             </script>
+             </div>
+             </figure>
+             </section> -->
     </article>
 </main>
-
+            
+        </main>
         <script src="../site.js"></script>        
     </body>
 </html>

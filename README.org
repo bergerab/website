@@ -1,0 +1,10 @@
+* Building
+
+First install dependencies (assuming you have python3 installed)
+
+#+BEGIN_SRC sh
+  pip -r requirements.txt install
+#+END_SRC
+
+To build run ~python build.py~ to watch and update every 500ms run
+~python watch.py~. For more granular building/watching use webgull directly.

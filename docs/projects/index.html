@@ -18,87 +18,86 @@
             <a href="../games/index.html">Games</a>
             <a href="../blog/index.html">Blog</a>
             <a href="../projects/index.html">Projects</a>
-            <a href="../drawings/index.html">Drawings</a>
+            <a href="../art/index.html">Art</a>
         </nav>
         <main>
-    <header>
-        <h3>Projects</h3>
-    </header>
-
-    <div class="summaries">
-        <section>
             <header>
-                <h1>Ortho</h1>
-            </header>
-            <a href="ortho/index.html">
-                <img class="preview" src="img/ortho.png"></img>
-            </a>
-            <p>
-                A toy 3D <a href="https://en.wikipedia.org/wiki/Orthographic_projection" target="_blank">orthographic projection</a>
-                rendering library. It is created with using <a href="https://www.w3.org/TR/2015/REC-2dcontext-20151119/" target="_blank">HTML Canvas 2D Context</a>
-                (no OpenGL/WebGL).
-                
-                It supports 3D translations, rotations, scaling, and can parse and render <a href="https://en.wikipedia.org/wiki/OFF_(file_format)" target="_blank">OFF</a> files.
-            </p>
-            <p>
-                Click and drag the mouse to rotate or use the WASD and QE keys to rotate. Translation can be done using the
-                arrow keys or by holding down shift then clicking and dragging the mouse.
-            </p>
-            <p>
-                By default the "Animate" setting is on. Click on the "Animate" setting again to disable.
-            </p>
-        </section>
+    <h2>Projects</h2>
+</header>
 
-        <section>
-            <header>
-                <h1>2D Vector Playground</h1>
-            </header>
-            <a href="2d-vector-playground/index.html">
-                <img class="preview" src="img/2d-vector-playground.png"></img>
-            </a>
-            <p>
-                A place to visualize 2D vectors and perform operations on 2D vectors (addition, multiplication, dot product, normalization, etc...)
-            </p>
-        </section>
+<div class="summaries">
+    <section>
+        <header>
+            <h1><i>l</i></h1>
+        </header>
+        <a href="https://github.com/bergerab/l" target="_blank">
+            <img class="preview" src="img/l.png"></img>
+        </a>
+        <p>
+            A library for generating DOM nodes.
+        </p>
+        <p>
+            It takes the wordiness out of <code>document.createElement('html')</code> generation
+        </p>
+        <p>
+            And gives it a <code>l.em('less verbose')</code> interface.
+        </p>
+    </section>
 
-        <section>
-            <header>
-                <h1>Objin</h1>
-            </header>
-            <a href="objin/index.html">
-                <img class="preview" src="img/l.png"></img>
-            </a>
-            <p>
+    
+    <section>
+        <header>
+            <h1><i>ldoc</i></h1>
+        </header>
+        <a href="https://bergerab.github.io/ldoc/docs/" target="_blank">                                        
+            <img class="preview" width="200" style="height: unset;" src="img/ldoc.png"></img>
+        </a>
+        <p>
+            Create keyboard navigation enabled documentation with <code>ldoc</code>
+        </p>
+        <p>
+            The library integrates with my other library, <code>l</code>, cleanly but it also works with any other JavaScript library that generates HTML (including the DOM API). It has support for separating documents into separate files, and using different file types, such as markdown.
+        </p>
+    </section>
 
-            </p>
-            <p>
+    <section>
+        <header>
+            <h1>Ortho</h1>
+        </header>
+        <a href="ortho/index.html">
+            <img class="preview" src="img/ortho.png"></img>
+        </a>
+        <p>
+            A toy 3D <a href="https://en.wikipedia.org/wiki/Orthographic_projection" target="_blank">orthographic projection</a>
+            rendering library. It is created with using <a href="https://www.w3.org/TR/2015/REC-2dcontext-20151119/" target="_blank">HTML Canvas 2D Context</a>
+            (no OpenGL/WebGL).
+            
+            It supports 3D translations, rotations, scaling, and can parse and render <a href="https://en.wikipedia.org/wiki/OFF_(file_format)" target="_blank">OFF</a> files.
+        </p>
+        <p>
+            Click and drag the mouse to rotate or use the WASD and QE keys to rotate. Translation can be done using the
+            arrow keys or by holding down shift then clicking and dragging the mouse.
+        </p>
+        <p>
+            By default the "Animate" setting is on. Click on the "Animate" setting again to disable.
+        </p>
+    </section>
 
-            </p>
-            <p>
-
-            </p>
-        </section>
-
-        <section>
-            <header>
-                <h1><i>l</i></h1>
-            </header>
-            <a href="l/index.html">
-                <img class="preview" src="img/l.png"></img>
-            </a>
-            <p>
-                A tiny library for generating DOM nodes.
-            </p>
-            <p>
-                It takes the wordiness out of <code>document.createElement('html')</code> generation
-            </p>
-            <p>
-                And gives it a <code>l.em('less verbose')</code> interface.
-            </p>
-        </section>
-    </div>
-</main>
-
+    <section>
+        <header>
+            <h1><i>ve2</i></h1>
+        </header>
+        <a href="https://bergerab.github.io/ve2/docs/" target="_blank">                        
+            <img class="preview" width="200" style="height: unset;" src="img/ve2.png"></img>
+        </a>
+        <p>
+            A 2D vector library that takes what I liked about several other vector libraries and puts it into one.
+        </p>
+    </section>
+    
+</div>
+            
+        </main>
         <script src="../site.js"></script>        
     </body>
 </html>
