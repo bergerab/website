@@ -5,7 +5,7 @@ Image-based programming is a nearly-lost art that has untapped potential. I woul
 To me, image-based programming is whenever you consider a program's runtime as a freezable and restorable entity. You can make the idea as dramatic as you'd like. You can freeze just global variables, or you could take it to absolute zero where every last drip of state can be frozen (including call stacks and instruction pointers). Depending on how dramatic you like to be, this could be done with any programming language (e.g. conceptually in Python `marshal.dumps(globals(), file)`). But the most extreme and most effective implementations are done using programming languages that are built from the ground up with support for images. This idea likely sounds too simple to be powerful, but this is all that is needed.
 
 ## Image Support for Python
-You don't need a special language to support and use images. In Python, you can roll your own support for images that freeze and restore global variables using Python's `globals()` and the `marshal` module. `globals()` allows you to get and set global variables, and `marshal` allows you to write many Python types to a binary format (that is strongly tied to the specific version of CPython you are using).
+You don't need a special language to support and use images. In Python, you can roll your own support for images that freeze and restore global variables using Python's `globals()` and the `marshal` module. `globals()` allows you to get and set global variables, and `marshal` allows you to write many Python types to a binary format (that is strongly tied to the specific version of CPython you are using). This isn't overwhelmingly useful, but it can build some motivation for how images can be used.
 
 Image support can start by worrying about writing the image first. The Python code below writes an image called `my.image` which contains all global functions defined in the module. This image will include the very functions which were used to write the image itself: `marshal_function` and `freeze`. This is a one-time step to generate an initial image.
 
@@ -44,7 +44,7 @@ def restore(file_path):
       globals[function.__name__] = function
 ```
 
-If you evaluate this file in a CPython REPL, you can interactively program with an the `my.image` image. You can load the image, create new functions, then freeze it when you're done. The state of all global functions can be saved off in one REPL session, and restored back in a seperate session. 
+If you evaluate this file in a CPython REPL, you can interactively program with an the `my.image` image. You can load the image, create new functions, then freeze it when you're done. The state of all global functions can be saved off in one REPL session, and restored back in a seperate session.
 
 ```sh
 $> python
@@ -61,39 +61,9 @@ bar
 >>>
 ```
 
+This mini-library allows programs to be made within the REPL. You can directly enter functions to the REPL, and saving the state of the REPL is as easy as calling `freeze`. Sessions can be restored via `restore`. Executable programs can be run by distributing the image file, and writing a small driver file (that loads the kernel, `restore(...)`, then calls a `main` function).
 
-### A horrible extreme
-
-```py
-import marshal, types
-
-def marshal_function(file, function):
-  marshal.dump(function.__name__, file)
-  marshal.dump(function.__code__, file)
-
-def restore(file):
-  while file.peek():
-    name = marshal.load(file)
-    code = marshal.load(file)
-    function = types.FunctionType(code, globals())
-    function.__name__ = name
-    globals()[function.__name__] = function
-
-def freeze(file_path):
-  with open(file_path, 'wb') as file:
-    marshal.dump(restore.__code__, file)
-    for value in (x for x in globals().values() if type(x) == types.FunctionType):
-      marshal_function(file, value)
-
-freeze('my.image')
-```
-
-```py
-import marshal, types
-
-with open('my.image', 'rb') as file:
-  types.FunctionType(marshal.load(file), globals())(file)
-```
+There are some clear disadvantages to this library. One being that once you load a function into the image, you lose the source code. There is no way of viewing what a function does, other than running the function. This is a limitation of our small library. It is possible that functions would persist the source code, to allow viewing, and exporting of all function sources (this is feature exists in many SmallTalk implementations).
 
 There is a problem with conducting open-brain surgery on yourself. If you make a single mistake, you won't have a surgeon to save you. You will have rendered both the patient and the surgeon useless at the same time. It's much better to have a 
 
