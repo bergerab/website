@@ -6,7 +6,9 @@
         </header>
 
         <p>
-            When working with HTML canvas, sometimes you'll find that things don't line up. Sometimes a circle that you draw looks like it fluctuates in size by a few pixels depending on where it is drawn on the canvas. Why is that?
+            When working with HTML canvas, sometimes you'll find that things don't line up. Sometimes a circle that you
+            draw looks like it fluctuates in size by a few pixels depending on where it is drawn on the canvas. Why is
+            that?
         </p>
 
         <p>
@@ -18,76 +20,79 @@
                 <div id="stage1-container">
                     <canvas id="stage1" width="100" height="24"></canvas>
                     <div>
-                        <label>Frame Rate (FPS): </label><input type="number" onchange="updateFrameRate(event);" value="30" max="144" min="1"></input>
+                        <label>Frame Rate (FPS): </label><input type="number" onchange="updateFrameRate(event);"
+                            value="30" max="144" min="1"></input>
                     </div>
                     <div>
                         <button id="start" onclick="toggleStart();">Start</button>
                     </div>
                 </div>
                 <style>
-                 /* Stretch the canvas to show the pixels better */
-                 #stage1, #stage1-container {
-                     width: 100%;
-                     max-width: 600px;
-                     margin: auto auto;
-                 }
-                 #stage1 {
-                     border: 1px solid black;
-                 }
+                    /* Stretch the canvas to show the pixels better */
+                    #stage1,
+                    #stage1-container {
+                        width: 100%;
+                        max-width: 600px;
+                        margin: auto auto;
+                    }
+
+                    #stage1 {
+                        border: 1px solid black;
+                    }
                 </style>
                 <script>
-                 function updateFrameRate(e) {
-                     fps = e.target.value;
-                     toggleStart(true);
-                 }
+                    function updateFrameRate(e) {
+                        fps = e.target.value;
+                        toggleStart(true);
+                    }
 
-                 function stopLoop() {
-                     clearInterval(interval);
-                 }
+                    function stopLoop() {
+                        clearInterval(interval);
+                    }
 
-                 function toggleStart(stop, start) {
-                     const startButton = document.getElementById('start');
-                     start = start === undefined ? startButton.textContent === 'Start' : start;
-                     stop = stop === undefined ? startButton.textContent === 'Stop' : stop;
-                     if (stop) {
-                         startButton.textContent = 'Start';
-                         stopLoop();
-                     } else if (start) {
-                         startButton.textContent = 'Stop';
-                         startLoop();
-                     }
-                 }
-                 
-                 let canvas = document.getElementById('stage1'),
-                     ctx = canvas.getContext('2d'),
-                     r = 10,
-                     x = 0,
-                     y = 0,
-                     dx = 1.3,
-                     interval = null,
-                     fps = 30;
+                    function toggleStart(stop, start) {
+                        const startButton = document.getElementById('start');
+                        start = start === undefined ? startButton.textContent === 'Start' : start;
+                        stop = stop === undefined ? startButton.textContent === 'Stop' : stop;
+                        if (stop) {
+                            startButton.textContent = 'Start';
+                            stopLoop();
+                        } else if (start) {
+                            startButton.textContent = 'Stop';
+                            startLoop();
+                        }
+                    }
 
-                 function startLoop() {
-                     interval = setInterval(() => {
-                         ctx.clearRect(0, 0, 300, 300);
-                         
-                         // draw "border"
-                         ctx.beginPath();
-                         ctx.fillStyle = 'black';
-                         ctx.arc(x-r, y+r+2, r+1, 0, Math.PI*2);
-                         ctx.closePath();
-                         ctx.fill();
+                    let canvas = document.getElementById('stage1'),
+                        ctx = canvas.getContext('2d'),
+                        r = 10,
+                        x = 0,
+                        y = 0,
+                        dx = 1.3,
+                        interval = null,
+                        fps = 30;
 
-                         // draw actual circle
-                         ctx.beginPath();
-                         ctx.fillStyle = 'lightgray';
-                         ctx.arc(x-r, y+r+2, r, 0, Math.PI*2);
-                         ctx.closePath();
-                         ctx.fill();
-                         x += dx;
-                         x = x % (100+r*2);
-                     }, 1000/fps);
-                 }
+                    function startLoop() {
+                        interval = setInterval(() => {
+                            ctx.clearRect(0, 0, 300, 300);
+
+                            // draw "border"
+                            ctx.beginPath();
+                            ctx.fillStyle = 'black';
+                            ctx.arc(x - r, y + r + 2, r + 1, 0, Math.PI * 2);
+                            ctx.closePath();
+                            ctx.fill();
+
+                            // draw actual circle
+                            ctx.beginPath();
+                            ctx.fillStyle = 'lightgray';
+                            ctx.arc(x - r, y + r + 2, r, 0, Math.PI * 2);
+                            ctx.closePath();
+                            ctx.fill();
+                            x += dx;
+                            x = x % (100 + r * 2);
+                        }, 1000 / fps);
+                    }
                 </script>
             </div>
         </figure>
@@ -97,84 +102,96 @@
         </p>
 
         <p>
-            This happens when the x and y coordinates of something drawn on the canvas (be it a path or fill) is a non-integer. In this case, the initial x and y coordinates are integers, but the velocity of the ball is 1.3 pixels per frame.
-            The canvas is doing us a favor by applying anti-aliasing to the circle to give the illusion that we have arbitrary precision x and y coordinates, when in reality we only have integer coordinates.
-            This can be confusing at times when you're creating low resolution images with HTML canvas where you can see this sort of detail. I've ran into this a few times when I make physics simulations with balls that have small borders (1 or 2 pixels) like the one seen above.
+            This happens when the x and y coordinates of something drawn on the canvas (be it a path or fill) is a
+            non-integer. In this case, the initial x and y coordinates are integers, but the velocity of the ball is 1.3
+            pixels per frame.
+            The canvas is doing us a favor by applying anti-aliasing to the circle to give the illusion that we have
+            arbitrary precision x and y coordinates, when in reality we only have integer coordinates.
+            This can be confusing at times when you're creating low resolution images with HTML canvas where you can see
+            this sort of detail. I've ran into this a few times when I make physics simulations with balls that have
+            small borders (1 or 2 pixels) like the one seen above.
         </p>
 
         <p>
-            Below is how the canvas in your browser applies anti-aliasing to a line of height 1 pixel with decimal offsets:
+            Below is how the canvas in your browser applies anti-aliasing to a line of height 1 pixel with decimal
+            offsets:
         </p>
-        
+
         <figure>
             <canvas id="stage2" width="210" height="215"></canvas>
             <style>
-             /* Stretch the canvas to make the anti-aliasing more apparent */
-             #stage2 {
-                 max-width: 400px;
-                 width: 100%;
-                 border: 1px solid black;
-                 display: block;
-                 margin: auto auto;
-             }
+                /* Stretch the canvas to make the anti-aliasing more apparent */
+                #stage2 {
+                    max-width: 400px;
+                    width: 100%;
+                    border: 1px solid black;
+                    display: block;
+                    margin: auto auto;
+                }
             </style>
 
             <script>
-             (function () {
-                 const canvas = document.getElementById('stage2'),
-                       ctx = canvas.getContext('2d');
+                (function () {
+                    const canvas = document.getElementById('stage2'),
+                        ctx = canvas.getContext('2d');
 
-                 function drawExamples(x=0, y=0) {
-                     let maxTextWidth = 0;
+                    function drawExamples(x = 0, y = 0) {
+                        let maxTextWidth = 0;
 
-                     function example(text, lineOffset=0) {
-                         const textWidth = ctx.measureText(text).width,
-                               textHeight = parseInt(ctx.font),
-                               textLeftPadding = textBottomPadding = 5,
-                               exampleLeftPadding = 20 + textLeftPadding,
-                               lineWidth = 100,
-                               lineHeight = 1;
-                         
-                         maxTextWidth = Math.max(maxTextWidth, textWidth);
-                         
-                         return function () {
-                             y += textHeight + textBottomPadding;                 
-                             ctx.fillText(text, textLeftPadding + (maxTextWidth - textWidth), y);
-                             ctx.fillRect(exampleLeftPadding + maxTextWidth, y - (textHeight/3) + lineOffset, lineWidth, lineHeight);
-                         }
-                     }
+                        function example(text, lineOffset = 0) {
+                            const textWidth = ctx.measureText(text).width,
+                                textHeight = parseInt(ctx.font),
+                                textLeftPadding = textBottomPadding = 5,
+                                exampleLeftPadding = 20 + textLeftPadding,
+                                lineWidth = 100,
+                                lineHeight = 1;
 
-                     [
-                         example('No offset:'),
-                         example('0.1 Offset:', 0.1),
-                         example('0.2 Offset:', 0.2),
-                         example('0.3 Offset:', 0.3),
-                         example('0.4 Offset:', 0.4),
-                         example('0.5 Offset:', 0.5),
-                         example('0.5 Offset:', 0.5),
-                         example('0.6 Offset:', 0.6),
-                         example('0.7 Offset:', 0.7),
-                         example('0.8 Offset:', 0.8),
-                         example('0.9 Offset:', 0.9),
-                         example('Integer Offset:', 1),                                                    
-                         
-                     ].map(f => f());
-                 }
-                 ctx.font = '12px Sarif';                  
-                 drawExamples(0, 0);
-             }());
+                            maxTextWidth = Math.max(maxTextWidth, textWidth);
+
+                            return function () {
+                                y += textHeight + textBottomPadding;
+                                ctx.fillText(text, textLeftPadding + (maxTextWidth - textWidth), y);
+                                ctx.fillRect(exampleLeftPadding + maxTextWidth, y - (textHeight / 3) + lineOffset, lineWidth, lineHeight);
+                            }
+                        }
+
+                        [
+                            example('No offset:'),
+                            example('0.1 Offset:', 0.1),
+                            example('0.2 Offset:', 0.2),
+                            example('0.3 Offset:', 0.3),
+                            example('0.4 Offset:', 0.4),
+                            example('0.5 Offset:', 0.5),
+                            example('0.5 Offset:', 0.5),
+                            example('0.6 Offset:', 0.6),
+                            example('0.7 Offset:', 0.7),
+                            example('0.8 Offset:', 0.8),
+                            example('0.9 Offset:', 0.9),
+                            example('Integer Offset:', 1),
+
+                        ].map(f => f());
+                    }
+                    ctx.font = '12px Sarif';
+                    drawExamples(0, 0);
+                }());
             </script>
         </figure>
 
         <p>
-            Look closely (zoom in with your browser). You should see that any line that does not have an integer y coordinate actually has a height of 2 pixels on the canvas.
-            If the line doesn't lie perfectly on a pixel, the intensity is interpolated between the two closest pixels to that coordinate. For example, the 0.5 offset gives both lines half the intensity of the original requested line.
-            This is what it means that the canvas has anti-aliasing, and currently there is no way to completely remove this feature universally in browsers.
+            Look closely (zoom in with your browser). You should see that any line that does not have an integer y
+            coordinate actually has a height of 2 pixels on the canvas.
+            If the line doesn't lie perfectly on a pixel, the intensity is interpolated between the two closest pixels
+            to that coordinate. For example, the 0.5 offset gives both lines half the intensity of the original
+            requested line.
+            This is what it means that the canvas has anti-aliasing, and currently there is no way to completely remove
+            this feature universally in browsers.
         </p>
 
         <p>
-            While it can't be turned off, if we didn't want this behavior for the simple cases such as these straight lines, we could apply <code>Math.floor</code> or <code>Math.ceil</code>
-            to the final coordinates that we are drawing on the canvas to effectively remove anti-aliasing. But that doesn't handle drawing curves or lines that are not horizontally or vertically parallel to the screen.
+            While it can't be turned off, if we didn't want this behavior for the simple cases such as these straight
+            lines, we could apply <code>Math.floor</code> or <code>Math.ceil</code>
+            to the final coordinates that we are drawing on the canvas to effectively remove anti-aliasing. But that
+            doesn't handle drawing curves or lines that are not horizontally or vertically parallel to the screen.
         </p>
     </article>
 </main>

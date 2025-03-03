@@ -22,6 +22,22 @@ img.preview {
     font-weight: bold;
 }
 
+.summaries .tags {
+    margin-top: 6px;
+}
+
+.summaries .tags * {
+    border: 1px solid black;
+    padding: 2px 4px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.summaries p {
+    margin-top: 8px;
+}
+
 header .date {
     float: right;
 }
@@ -34,12 +50,13 @@ img.drawing {
     height: 200px;
 }
 
-a, u {
+a,
+u {
     /* Don't underline links */
     text-decoration: none;
 }
 
-nav > a {
+nav>a {
     margin-right: 10px;
 }
 
